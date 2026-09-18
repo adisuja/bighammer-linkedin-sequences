@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Benchmark scorecard · BigHammer.ai LinkedIn sequences</title>
 <meta name="robots" content="noindex, nofollow">
-<link rel="stylesheet" href="styles.css?v=12">
+<link rel="stylesheet" href="styles.css?v=13">
 <style>
   .doc{max-width:960px;margin:0 auto;padding:28px 24px 80px;font-size:15px;line-height:1.55;color:#1d1d1f}
   .doc h1{font-size:28px;letter-spacing:-.3px;margin:0 0 6px}
@@ -98,14 +98,14 @@
 
   <h2>4. Where it loses to the benchmark, given the webinar goal</h2>
   <div class="fix"><b>Fix 0 — The page and the calendar (blocking).</b>Three things gate attendance before any copy does. (a) The raw HTML of webinar.bighammerai.com still says "June 18, 2026 · 11:00 AM ET"; only the in-browser render shows 15 October, 12:00 PM ET. LinkedIn's link unfurl, search engines and anything without JavaScript therefore show a past event. Fix the served HTML before any message carrying {{webinar_url}} ships. (b) The Calendly demo link used in A4, B2-hot and C3 renders "This calendar is currently unavailable." (c) Day offsets, not dates, drive the sequence: with a 21 September start, A4 lands on Saturday 3 October and A5 on Friday 16 October, the day after the event. Anchor the invite to the calendar instead: every accepted connection gets the masterclass message by T−7, whatever step they are on.</div>
-  <div class="fix"><b>Fix 1 — Move the webinar forward in Campaign A (biggest copy lever).</b>Today the masterclass is A5: day 25, conditional on silence. A free 45-minute session is a lower-friction ask than A4's 30-minute demo that needs a workspace id, so it should come <i>before</i> the demo, not after. Recommended order: A1 (thank-you) → A2 (CPU proof) → A3 (queries) → <b>A4 = masterclass invite</b> → A5 = demo offer, only if they engaged. Expected effect: the webinar CTA reaches every accepted connection instead of only the ~90% who never replied (at a 10% reply rate) and who happen to still be in sequence on day 25.</div>
-  <div class="fix"><b>Fix 2 — Give Campaign B a webinar exit.</b>B2-hot offers the queries and the demo; the masterclass is absent. For a "yes" from a 1st-degree connection the masterclass is the natural middle step. The <b>B1 · LIVE webinar-led</b> card on the preview page is the direct version; at minimum add a third option to B2-hot: "or sit in on the live teardown on {{webinar_date}}: {{webinar_url}}".</div>
+  <div class="fix"><b>Fix 1 — Move the webinar forward in Campaign A (applied 19 Sep: the masterclass CTA now sits in A2, the assessment in A3, the BigHammer offer in A4).</b>Today the masterclass is A5: day 25, conditional on silence. A free 45-minute session is a lower-friction ask than A4's 30-minute demo that needs a workspace id, so it should come <i>before</i> the demo, not after. Recommended order: A1 (thank-you) → A2 (CPU proof) → A3 (queries) → <b>A4 = masterclass invite</b> → A5 = demo offer, only if they engaged. Expected effect: the webinar CTA reaches every accepted connection instead of only the ~90% who never replied (at a 10% reply rate) and who happen to still be in sequence on day 25.</div>
+  <div class="fix"><b>Fix 2 — Give Campaign B a webinar exit (applied 19 Sep: B2-hot offers the masterclass as option 2; B2-cold and B3-park carry the link).</b>B2-hot offers the queries and the demo; the masterclass is absent. For a "yes" from a 1st-degree connection the masterclass is the natural middle step. The <b>B1 · LIVE webinar-led</b> card on the preview page is the direct version; at minimum add a third option to B2-hot: "or sit in on the live teardown on {{webinar_date}}: {{webinar_url}}".</div>
   <div class="fix"><b>Fix 3 — Put the reminder layer in place (the +27% lever, measured on email).</b>Campaign C starts the day <i>after</i> the event; attendance is decided before it. Registration is an external form that captures a work email and promises "calendar invite and reminder", so first confirm the email reminders actually fire at −1 day, −1 hour and −5 minutes, since that is where the +27% is measured. Then mirror the session as a LinkedIn Event, which gives native invites and LinkedIn's own reminders, and add two LinkedIn touches to registrants you can match to a profile: C0-a the day before, C0-b two hours before. Suggested copy (deliberately no recording promise, since the goal is live seats):
     <pre class="copy">{{first_name}} - tomorrow, 12pm ET. One thing to do before it if you have five minutes: pull cpu_user_percent + cpu_system_percent from system.compute.node_timeline for last week. You'll know within the first ten minutes whether the 20% / 40% threshold bites at {{company}}.</pre>
     <pre class="copy">Starting in two hours. Link's in your calendar invite, or here: {{webinar_url}}
 
 Bring one number if you can: your biggest all-purpose cluster's average CPU last month. It'll make the Q&A worth your time.</pre></div>
-  <div class="fix"><b>Fix 4 — Tighten the long messages (reply rate, not attendance).</b>A2 runs 520 characters and A3 603–694; LinkedIn's own InMail data puts the response-rate cliff at 400. Neither needs to lose its substance: A3 can cut the closing paragraph to one line, and A2 can drop the final two sentences. See the counts in the table above.</div>
+  <div class="fix"><b>Fix 4 — Length (reply rate, not attendance).</b>The 19 Sep revision deliberately traded length for context: A2, A3, A4 and B2-hot now run 950–1,100 characters; LinkedIn's own InMail data puts the response-rate cliff at 400. Neither needs to lose its substance: A3 can cut the closing paragraph to one line, and A2 can drop the final two sentences. See the counts in the table above.</div>
   <div class="fix"><b>Fix 5 — C2 v2 (to approve) scores below the version it replaces (post-event, so no effect on attendance).</b>The new version drops the first-name merge, and its second line does not parse: "But you still couldn't make it to reduce your databricks costs up to 75%, but Bighammer has got you!" has two "but"s, lowercases the product name and misspells the brand. The previous version said the same thing plainly, with the name, in roughly the same length (321 vs 339 characters). If the team wants the lighter tone, keep the name and fix the sentence: <i>"{{first_name}} - your calendar won yesterday, which is fair. Recording's here: {{replay_url}}. The short version: seven read-only queries, four findings, about half the savings need no migration at all."</i> Both versions depend on {{replay_url}}, which has no live page yet.</div>
 
   <h3>Smaller items</h3>
@@ -131,7 +131,7 @@ Bring one number if you can: your biggest all-purpose cluster's average CPU last
   </ul>
   <p class="src">Caveat: most outreach datasets come from automation vendors and mix cold and warm motions; the spread between studies is real. Ranges are shown rather than single figures wherever the sources disagree.</p>
 </main>
-<script src="data.js?v=12"></script>
+<script src="data.js?v=13"></script>
 <script>
 (function(){
   const D = window.LI_DATA;
@@ -140,23 +140,23 @@ Bring one number if you can: your biggest all-purpose cluster's average CPU last
     "A0-compose":   [8.5, 4.0, "Textbook note. Context, no link, ~190 chars. Depends on the AI research field."],
     "A0-received":  [8.5, 4.0, "Same note as the prospect sees it. Reply-to-note does not accept the invite."],
     "A0-live-role": [7.5, 4.0, "Sound role-based fallback; trim toward 150 chars if acceptance lags."],
-    "A0-live-webinar":[7.5, 7.0, "Best LIVE note for the objective: the masterclass is the reason to connect, no link."],
+    "A0-live-webinar": [7.5, 7.5, "Best LIVE note for the objective: names the masterclass by title, no link."],
     "A0-bare":      [8.0, 3.0, "Correct call when there is no context; blank beats generic."],
     "A1":           [8.5, 3.0, "Strong opener. Names the pain in their words, easy either-way answer."],
-    "A2":           [8.0, 3.0, "Best proof message in the set. Over the 400-char line; cut the last two sentences."],
-    "A3-v2":        [6.5, 3.5, "Continuity is good; opener reads as a hook; inline link after a full stop; 600+ chars."],
+    "A2": [8.0, 8.0, "Revised 19 Sep: explains node_timeline and the CPU columns in plain English and carries the masterclass CTA. Long; the context is the point."],
+    "A3-v2": [7.5, 6.5, "Revised 19 Sep: says what the assessment is, how it runs, what it finds, with a case-study number and three CTAs."],
     "A3-v1":        [7.0, 3.5, "Cleaner link placement, same length problem."],
-    "A4":           [7.5, 2.0, "Well-written demo ask, but it lands before the webinar was ever offered."],
-    "A5":           [7.5, 8.0, "The right message in the wrong slot. Has the recording line. Move to A4."],
+    "A4": [7.5, 5.0, "Revised 19 Sep: introduces the BigHammer offer after the assessment and the masterclass, then the demo ask."],
+    "A5": [8.0, 8.5, "Revised 19 Sep: title, host, agenda, gift-card hook, recording line."],
     "B1":           [9.5, 3.0, "The best message here. One of the highest-reply motions on LinkedIn."],
-    "B1-live":      [8.0, 8.5, "Direct-to-seat version; keeps the permission-to-say-no exit."],
-    "B2-hot":       [7.5, 2.0, "Good two-option structure; the masterclass should be one of the options."],
-    "B2-cold":      [8.0, 2.5, "Clean close. Could carry the webinar link instead of the queries."],
-    "B3-park":      [8.5, 3.0, "The urgency question is the smartest CTA in the set."],
-    "C1":           [8.0, 7.0, "Right follow-up; one specific number, one open question."],
-    "C2-v2":        [4.5, 6.0, "Drops the name merge; second sentence does not parse (two \"but\"s, lowercase databricks, Bighammer). Weaker than v1."],
-    "C2-v1":        [7.5, 7.0, "Plain, respectful, does the job. Depends on a replay page that does not exist yet."],
-    "C3":           [7.0, 5.0, "Fine demo nudge; a replay/next-session nudge would fit the goal better."]
+    "B1-live": [8.0, 9.0, "Direct-to-seat version with the title and host; keeps the permission-to-say-no exit."],
+    "B2-hot": [7.5, 7.0, "Revised 19 Sep: three options, the masterclass is now one of them. Long."],
+    "B2-cold": [8.0, 7.0, "Revised 19 Sep: assessment described plus the masterclass link."],
+    "B3-park": [8.5, 5.0, "Urgency question kept; masterclass link added."],
+    "C1": [8.0, 7.5, "Revised 19 Sep: ties the threshold to query one of the assessment; adds the session CTA."],
+    "C2-v2": [6.5, 7.5, "Revised 19 Sep: keeps the opener, fixes the second sentence, adds title, agenda and assessment CTA. Still no name merge."],
+    "C2-v1": [7.5, 7.5, "Revised 19 Sep: title, case study and assessment added. Depends on a replay page that does not exist yet."],
+    "C3": [7.5, 7.5, "Revised 19 Sep: session CTA plus replay and next-session links."]
   };
   const rows = [], overalls = [];
   for (const c of D.campaigns) for (const s of c.screens) {
