@@ -139,6 +139,7 @@ Bring one number if you can: your biggest all-purpose cluster's average CPU last
   const fill = t => String(t).replace(/\{\{(\w+)\}\}/g, (m,k) => D.tokens[k] ?? m);
   const R = {
     "A0-compose":   [8.5, 4.0, "Textbook note. Context, no link, ~190 chars. Depends on the AI research field."],
+    "A0-received":  [8.5, 4.0, "Same note as the prospect sees it. Reply-to-note does not accept the invite."],
     "A0-live-role": [7.5, 4.0, "Sound role-based fallback; trim toward 150 chars if acceptance lags."],
     "A0-live-webinar":[7.5, 7.0, "Best LIVE note for the objective: the masterclass is the reason to connect, no link."],
     "A0-bare":      [8.0, 3.0, "Correct call when there is no context; blank beats generic."],
