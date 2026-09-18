@@ -20,21 +20,35 @@
     color: "#0b6e4f"
   };
 
+  // Live links (all tested 2026-09-18, see linkChecks below).
+  const ASSESS = "https://assessment.bighammerops.com";
+  const DEMO = "https://calendly.com/bighammer-marketing/your-free-bighammer-ai-demo";
+  const WEBINAR = "https://webinar.bighammerai.com/";
+
   const tokens = {
     first_name: prospect.first_name,
     company: prospect.company,
     personalization_short: "your point on Unity Catalog migration eating the quarter landed",
-    webinar_date: "Thursday 15 October, 11am ET",
-    webinar_url: "https://bighammer.ai/masterclass",
-    replay_url: "https://bighammer.ai/masterclass/replay"
+    webinar_date: "Thursday 15 October, 12pm ET",
+    webinar_url: WEBINAR,
+    // No replay page exists yet; sample points at the webinar page so the link works. Replace when the recording is hosted.
+    replay_url: WEBINAR
   };
 
-  // Link-preview cards (LinkedIn unfurls the first URL in a message). Keyed by hostname.
+  // Link-preview cards (LinkedIn unfurls the first URL in a message). Keyed by hostname. Titles are the live <title> tags.
   const previews = {
     "assessment.bighammerops.com": { title: "Reduce Your Databricks Costs up to 75% — BigHammer.ai", domain: "assessment.bighammerops.com" },
-    "calendly.com": { title: "Your free BigHammer.ai demo · 30 min", domain: "calendly.com" },
-    "bighammer.ai": { title: "Databricks Cost Masterclass — BigHammer.ai", domain: "bighammer.ai" }
+    "calendly.com": { title: "BigHammer Ai - Calendly", domain: "calendly.com" },
+    "webinar.bighammerai.com": { title: "Reduce Databricks Costs — to 75% — Live Masterclass | BigHammer.ai", domain: "webinar.bighammerai.com" }
   };
+
+  const linkChecks = [
+    { url: ASSESS, status: 200, title: "Reduce Your Databricks Costs up to 75% — BigHammer.ai" },
+    { url: DEMO, status: "broken", title: "HTTP 200 but the page renders \"BigHammer Ai — This calendar is currently unavailable.\" Re-enable the event type in Calendly before A4, B2-hot or C3 ship." },
+    { url: WEBINAR, status: 200, title: "Reduce Databricks Costs — to 75% — Live Masterclass | BigHammer.ai" },
+    { url: "{{replay_url}}", status: null, title: "No replay page exists yet — sample falls back to the webinar page" }
+  ];
+  const linkCheckedAt = "18 Sep 2026, 23:08 IST";
 
   // Day 0 of every sequence (used for the date separators in the thread).
   const baseDate = new Date(2026, 8, 21); // Mon 21 Sep 2026
@@ -46,6 +60,13 @@
 I work with Data teams on Databricks costs. Not pitching, just seems like we circle the same problems.
 
 Worth connecting?`;
+
+  // LIVE track: no AI-researched field. Two options, pick one per seat.
+  const A0_LIVE_ROLE =
+`{{first_name}}, I spend most of my time inside Databricks cost data for data teams around {{company}}'s size. Always useful to know people wrestling with the same compute-budget maths. Open to connecting?`;
+
+  const A0_LIVE_WEBINAR =
+`{{first_name}}, I host a 45-minute live teardown of a real Databricks bill for data leaders, no pitch in it. Thought the next one might be useful to you. Open to connecting?`;
 
   const A1 =
 `Thanks for connecting, {{first_name}}.
@@ -74,7 +95,7 @@ That CPU check is one piece of a bigger assessment we run for clients. We just p
 
 Seven read-only queries, one SQL warehouse session, nothing installed and no credentials shared.
 
-They find four things: idle and oversized compute, interactive compute doing scheduled work, compute burned on runs that were always going to fail, and Photon markup on workloads that got no speedup from it. assessment.bighammerops.com
+They find four things: idle and oversized compute, interactive compute doing scheduled work, compute burned on runs that were always going to fail, and Photon markup on workloads that got no speedup from it. ${ASSESS}
 
 Genuinely no strings. Plenty of teams run it and we never speak again. Curious whether the Photon one applies to you; it's the most commonly switched-on-and-forgotten setting we see.`;
 
@@ -83,7 +104,7 @@ Genuinely no strings. Plenty of teams run it and we never speak again. Curious w
 
 They find four things: idle and oversized compute, interactive compute doing scheduled work, compute burned on runs that were always going to fail, and Photon markup on workloads that got no speedup from it.
 
-assessment.bighammerops.com
+${ASSESS}
 
 Genuinely no strings, plenty of teams run it and we never speak again. Curious whether the Photon one applies to you; it's the most commonly switched-on-and-forgotten setting we see.`;
 
@@ -92,7 +113,7 @@ Genuinely no strings, plenty of teams run it and we never speak again. Curious w
 
 If it'd be quicker to just have someone walk your spend with you, we do a 30-minute session where we run the assessment live on your workspace and go through the findings together. You bring a workspace id, that's it.
 
-https://calendly.com/bighammer-marketing/your-free-bighammer-ai-demo
+${DEMO}
 
 If it's not a priority this quarter, no problem at all${SEP}I'll leave it there and you've got the queries either way.`;
 
@@ -108,6 +129,13 @@ Register even if the time doesn't work and you'll get the recording.`;
   const B1 =
 `{{first_name}}${SEP}quick one. Is Databricks cost something you're actively looking at right now, or is it under control?`;
 
+  const B1_LIVE_WEBINAR =
+`{{first_name}}${SEP}quick one. Is Databricks cost something you're looking at right now?
+
+If it is, we're tearing down a real workspace's bill live on {{webinar_date}}, 45 minutes plus Q&A: {{webinar_url}}
+
+If it's under control, just say so and I'll leave it there.`;
+
   const B_REPLY_HOT = `Yes, it's a live one. The bill is up about 40% year on year and our renewal conversation starts next quarter.`;
   const B_REPLY_PARK = `Under control for now, thanks though.`;
 
@@ -116,10 +144,10 @@ Register even if the time doesn't work and you'll get the recording.`;
 
 Two ways to get a number on it:
 
-1. Run it yourself. We publish the exact read-only queries: assessment.bighammerops.com${SEP}seven queries, one session, nothing installed.
+1. Run it yourself. We publish the exact read-only queries: ${ASSESS}${SEP}seven queries, one session, nothing installed.
 
 2. Do it with us. 30 minutes, we run it live on your workspace and go through the findings:
-https://calendly.com/bighammer-marketing/your-free-bighammer-ai-demo
+${DEMO}
 
 Either's fine. What's your rough annual Databricks spend, so I know whether this is even worth your time?`;
 
@@ -128,14 +156,14 @@ Either's fine. What's your rough annual Databricks spend, so I know whether this
 
 Leaving you one thing that's useful either way: the read-only queries we use to assess Databricks spend. CPU utilisation, cluster class, failed-run waste, Photon markup. One SQL warehouse session, nothing installed.
 
-assessment.bighammerops.com
+${ASSESS}
 
 That's it from me.`;
 
   const B3_PARK =
 `Understood${SEP}I'll get out of your way.
 
-If it becomes live later, the queries live at assessment.bighammerops.com and you can just reply here.
+If it becomes live later, the queries live at ${ASSESS} and you can just reply here.
 
 Out of interest, what's the thing that would make it urgent${SEP}a budget review, a renewal, or a project that's blocked behind the commit?`;
 
@@ -144,7 +172,7 @@ Out of interest, what's the thing that would make it urgent${SEP}a budget review
 
 The bit people usually go back to is the utilisation threshold: under 20% average CPU and under 40% at p95, on any cluster that ran 30 minutes or more. That's the definition we use for "oversized", and it's in the published queries.
 
-assessment.bighammerops.com
+${ASSESS}
 
 Anything from the session you want me to go deeper on?`;
 
@@ -168,7 +196,7 @@ The short version: seven read-only queries, four findings, and about half the sa
 
 If it'd be faster to have someone do it with you, we do a 30-minute session where we run it live on your workspace and go through what it finds:
 
-https://calendly.com/bighammer-marketing/your-free-bighammer-ai-demo`;
+${DEMO}`;
 
   // ---------- helpers to build threads ----------
   const S = (day, time, text, extra) => Object.assign({ from: "sender", day, time, text }, extra || {});
@@ -196,6 +224,16 @@ https://calendly.com/bighammer-marketing/your-free-bighammer-ai-demo`;
           id: "A0-received", type: "invite_received", label: "A0 · Connection request note", sub: "Variant A1 — as the prospect sees it (My Network → Invitations)",
           note: A0_NOTE, chips: [],
           notes: "Zero links in the note. It buys the accept, nothing else. Reply-to-note does not accept the invitation, so the thread only opens once they tap Accept."
+        },
+        {
+          id: "A0-live-role", type: "invite_compose", label: "A0 · LIVE note (option 1)", sub: "No AI research needed · role-based",
+          note: A0_LIVE_ROLE, chips: ["LIVE"],
+          notes: "LIVE track: uses only CRM fields (first name, company). Benchmarks put the acceptance sweet spot at 120–180 characters; this sits just above, so trim the middle sentence if acceptance lags."
+        },
+        {
+          id: "A0-live-webinar", type: "invite_received", label: "A0 · LIVE note (option 2)", sub: "No AI research needed · webinar-led · as the prospect sees it",
+          note: A0_LIVE_WEBINAR, chips: ["LIVE"],
+          notes: "LIVE track: names the masterclass as the reason to connect without a link (links in notes read as spam). Pairs with A5 or B1-LIVE for the registration ask."
         },
         {
           id: "A0-bare", type: "invite_received", label: "A0 · Connection request", sub: "Variant A2 — no personalization available · send the request bare",
@@ -230,7 +268,7 @@ https://calendly.com/bighammer-marketing/your-free-bighammer-ai-demo`;
         {
           id: "A5", type: "thread", label: "A5 · Day 25", sub: "Soft revival — only if no reply to A1–A4", chips: ["Conditional"],
           messages: [mA1, mA2, mA3v2, mA4, mA5],
-          notes: "Cap the sequence at 5 touches. Kill on any reply, including negative ones, and route to a human."
+          notes: "Cap the sequence at 5 touches. Kill on any reply, including negative ones, and route to a human. Note the copy says 30 + 15 minutes; the live page says 45 minutes plus Q&A."
         }
       ]
     },
@@ -243,6 +281,11 @@ https://calendly.com/bighammer-marketing/your-free-bighammer-ai-demo`;
           id: "B1", type: "thread", label: "B1 · Day 0", sub: "The 9-word open", chips: [],
           messages: [S(0, "9:12 am", B1)],
           notes: "Deliberately tiny. First-degree connections reply to questions, not to paragraphs. The \"or is it under control\" half is what makes it answerable: it gives permission to say no, which is why people say something.<br><br><b>Branch on the reply</b><br>\"Yes / it's a problem\" → B2-hot<br>\"It's fine / not now\" → B3-park, then stop<br>No reply after 4 days → B2-cold"
+        },
+        {
+          id: "B1-live", type: "thread", label: "B1 · LIVE webinar-led", sub: "Direct-to-registration variant of the open", chips: ["LIVE"],
+          messages: [S(0, "9:12 am", B1_LIVE_WEBINAR)],
+          notes: "LIVE track: same question, but the webinar is the answer for a \"yes\". Use when the goal of the send is seats, not conversations. Same branching as B1."
         },
         {
           id: "B2-hot", type: "thread", label: "B2-hot · same day", sub: "After a positive reply", chips: ["Sample reply shown"],
@@ -274,7 +317,7 @@ https://calendly.com/bighammer-marketing/your-free-bighammer-ai-demo`;
         {
           id: "C2-v2", type: "thread", label: "C2 · No-show, day after", sub: "NEW VERSION", chips: ["To approve"],
           messages: [S(0, "8:58 am", C2_V2)],
-          notes: "To be approved. Note: no first-name merge in this version, so it reads identically for every no-show."
+          notes: "To be approved. No first-name merge in this version, so it reads identically for every no-show. {{replay_url}} has no live page yet; the sample falls back to the webinar page."
         },
         {
           id: "C2-v1", type: "thread", label: "C2 · No-show, day after", sub: "Previous version, for comparison", chips: ["Previous"],
@@ -290,5 +333,5 @@ https://calendly.com/bighammer-marketing/your-free-bighammer-ai-demo`;
     }
   ];
 
-  window.LI_DATA = { SEP, sender, prospect, tokens, previews, baseDate, campaigns };
+  window.LI_DATA = { SEP, sender, prospect, tokens, previews, linkChecks, linkCheckedAt, baseDate, campaigns };
 })();

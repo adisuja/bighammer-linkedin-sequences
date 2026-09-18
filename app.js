@@ -104,8 +104,16 @@
 
   // ---------- page ----------
   function chipHtml(c) {
-    const cls = /approve/i.test(c) ? "approve" : /previous/i.test(c) ? "prev" : /sample/i.test(c) ? "sample" : "";
+    const cls = /approve/i.test(c) ? "approve" : /previous/i.test(c) ? "prev" : /sample/i.test(c) ? "sample" : /^live/i.test(c) ? "live" : /research|down/i.test(c) ? "research" : "";
     return `<span class="chip ${cls}">${esc(c)}</span>`;
+  }
+  function allText(scr) { return scr.type === "thread" ? scr.messages.filter(m => m.from === "sender").map(m => m.text).join("\n") : (scr.note || ""); }
+  function autoChips(scr) {
+    const chips = (scr.chips || []).slice();
+    if (/\{\{personalization_short\}\}/.test(allText(scr))) chips.push("Needs AI research");
+    else if (!chips.some(c => /^live$/i.test(c))) chips.push("Live-ready");
+    if (/calendly\.com/.test(allText(scr))) chips.push("Calendly link down");
+    return chips;
   }
 
   function currentText(scr) {
@@ -129,7 +137,7 @@
     }
     const copyBtn = currentText(scr) ? `<button class="copy" data-copy="${esc(scr.id)}">Copy text</button>` : "";
     return `<article class="card" id="${esc(scr.id)}">
-      <header class="card-head"><div class="card-label">${esc(scr.label)}</div><div class="card-sub">${esc(scr.sub)}</div>${scr.chips && scr.chips.length ? `<div class="chips">${scr.chips.map(chipHtml).join("")}</div>` : ""}</header>
+      <header class="card-head"><div class="card-label">${esc(scr.label)}</div><div class="card-sub">${esc(scr.sub)}</div><div class="chips">${autoChips(scr).map(chipHtml).join("")}</div></header>
       ${phone(screen)}
       <footer class="card-foot"><div class="foot-row"><div class="meta">${meta}</div>${copyBtn}</div>${scr.notes ? `<div class="note">${scr.notes}</div>` : ""}</footer>
     </article>`;
@@ -137,13 +145,14 @@
 
   function render() {
     const main = document.getElementById("main");
-    main.innerHTML = D.campaigns.map(c => `<section class="campaign" id="campaign-${c.id}"><div class="campaign-head"><h2>${esc(c.title)}</h2><p>${esc(c.subtitle)}</p></div><div class="rail">${c.screens.map(card).join("")}</div></section>`).join("");
+    const links = `<section class="campaign linkcheck" id="links"><div class="campaign-head"><h2>Link check</h2><p>Every URL used in the copy, tested ${esc(D.linkCheckedAt)}. Links inside the phones open in a new tab.</p></div><table class="ltable"><thead><tr><th>URL</th><th>Status</th><th>Page title</th></tr></thead><tbody>${D.linkChecks.map(l => `<tr><td>${/^https?:/.test(l.url) ? `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.url)}</a>` : `<span class="tok">${esc(l.url)}</span>`}</td><td><span class="st ${l.status === 200 ? "ok" : l.status === "broken" ? "bad" : "warn"}">${l.status === 200 ? "200 OK · verified visually" : l.status === "broken" ? "BROKEN" : "not live yet"}</span></td><td>${esc(l.title)}</td></tr>`).join("")}</tbody></table></section>`;
+    main.innerHTML = D.campaigns.map(c => `<section class="campaign" id="campaign-${c.id}"><div class="campaign-head"><h2>${esc(c.title)}</h2><p>${esc(c.subtitle)}</p></div><div class="rail">${c.screens.map(card).join("")}</div></section>`).join("") + links;
     main.querySelectorAll('.body[data-scroll="bottom"]').forEach(b => { b.scrollTop = b.scrollHeight; });
     const nav = document.getElementById("sidenav");
     nav.innerHTML = D.campaigns.map(c => `<h4>${esc(c.title)}</h4>` + c.screens.map(s => {
-      const tag = (s.chips || []).find(x => /approve|previous/i.test(x));
-      return `<a href="#${esc(s.id)}" data-target="${esc(s.id)}">${esc(s.label)}${tag ? `<span class="tag ${/previous/i.test(tag) ? "prev" : ""}">${esc(tag)}</span>` : ""}</a>`;
-    }).join("")).join("");
+      const tag = (s.chips || []).find(x => /approve|previous|^live$/i.test(x));
+      return `<a href="#${esc(s.id)}" data-target="${esc(s.id)}">${esc(s.label)}${tag ? `<span class="tag ${/previous/i.test(tag) ? "prev" : /live/i.test(tag) ? "live" : ""}">${esc(tag)}</span>` : ""}</a>`;
+    }).join("")).join("") + `<h4>More</h4><a href="scorecard.html">Benchmark scorecard →</a><a href="#links" data-target="links">Link check</a>`;
   }
 
   // ---------- events ----------
@@ -178,7 +187,7 @@
 
   function goTo(el) {
     const rail = el.closest(".rail");
-    rail.scrollTo({ left: el.offsetLeft - 26, behavior: "smooth" });
+    if (rail) rail.scrollTo({ left: el.offsetLeft - 26, behavior: "smooth" });
     const top = el.getBoundingClientRect().top + window.scrollY - (document.querySelector(".topbar").offsetHeight + 12);
     window.scrollTo({ top, behavior: "smooth" });
   }
