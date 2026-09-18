@@ -1,6 +1,7 @@
 /* BigHammer.ai LinkedIn sequences — copy + sample merge data.
    Edit copy here. Tokens use {{token}} syntax. SEP is what renders where the
-   source copy had an em dash removed (change to ",", "~", " - " etc. in one place). */
+   source copy had an em dash removed (change to ",", "~", " - " etc. in one place).
+   Structure: campaigns → steps (left to right, in send order) → variants (stacked). */
 (function () {
   const SEP = " - ";
 
@@ -12,15 +13,14 @@
   };
 
   const prospect = {
-    first_name: "Priya",
-    name: "Priya Raman",
+    first_name: "Sarah",
+    name: "Sarah Mitchell",
     headline: "Head of Data Platform at Meridian Health",
     company: "Meridian Health",
-    initials: "PR",
+    initials: "SM",
     color: "#0b6e4f"
   };
 
-  // Live links (all tested 2026-09-18, see linkChecks below).
   const ASSESS = "https://assessment.bighammerops.com";
   const DEMO = "https://calendly.com/bighammer-marketing/your-free-bighammer-ai-demo";
   const WEBINAR = "https://webinar.bighammerai.com/";
@@ -31,11 +31,9 @@
     personalization_short: "your point on Unity Catalog migration eating the quarter landed",
     webinar_date: "Thursday 15 October, 12pm ET",
     webinar_url: WEBINAR,
-    // No replay page exists yet; sample points at the webinar page so the link works. Replace when the recording is hosted.
-    replay_url: WEBINAR
+    replay_url: WEBINAR // no replay page exists yet; falls back to the webinar page so the link works
   };
 
-  // Link-preview cards (LinkedIn unfurls the first URL in a message). Keyed by hostname. Titles are the live <title> tags.
   const previews = {
     "assessment.bighammerops.com": { title: "Reduce Your Databricks Costs up to 75% — BigHammer.ai", domain: "assessment.bighammerops.com" },
     "calendly.com": { title: "BigHammer Ai - Calendly", domain: "calendly.com" },
@@ -50,8 +48,9 @@
   ];
   const linkCheckedAt = "18 Sep 2026, 23:08 IST";
 
-  // Day 0 of every sequence (used for the date separators in the thread).
-  const baseDate = new Date(2026, 8, 21); // Mon 21 Sep 2026
+  const T = "10:00 am";   // every send goes out at 10 AM
+  const TR = "10:20 am";  // sample prospect replies
+  const TA = "10:45 am";  // sends that answer a same-day reply
 
   // ---------- COPY ----------
   const A0_NOTE =
@@ -61,7 +60,6 @@ I work with Data teams on Databricks costs. Not pitching, just seems like we cir
 
 Worth connecting?`;
 
-  // LIVE track: no AI-researched field. Two options, pick one per seat.
   const A0_LIVE_ROLE =
 `{{first_name}}, I spend most of my time inside Databricks cost data for data teams around {{company}}'s size. Always useful to know people wrestling with the same compute-budget maths. Open to connecting?`;
 
@@ -198,140 +196,89 @@ If it'd be faster to have someone do it with you, we do a 30-minute session wher
 
 ${DEMO}`;
 
-  // ---------- helpers to build threads ----------
-  const S = (day, time, text, extra) => Object.assign({ from: "sender", day, time, text }, extra || {});
-  const P = (day, time, text) => ({ from: "prospect", day, time, text, sample: true });
+  // ---------- helpers ----------
+  const S = (day, text) => ({ from: "sender", day, time: T, text });
+  const P = (day, text) => ({ from: "prospect", day, time: TR, text, sample: true });
+  const SA = (day, text) => ({ from: "sender", day, time: TA, text });
 
-  const mA1 = S(0, "9:14 am", A1);
-  const mA2 = S(3, "10:02 am", A2);
-  const mA3v2 = S(7, "8:47 am", A3_V2);
-  const mA3v1 = S(7, "8:47 am", A3_V1);
-  const mA4 = S(12, "9:31 am", A4);
-  const mA5 = S(25, "11:05 am", A5);
+  const mA1 = S(0, A1), mA2 = S(3, A2), mA3v2 = S(7, A3_V2), mA3v1 = S(7, A3_V1), mA4 = S(12, A4), mA5 = S(25, A5);
+  const mB1 = S(0, B1);
 
+  // kinds: "connection" | "message" | "inmail"
   const campaigns = [
     {
       id: "A",
       title: "Campaign A — Connector",
-      subtitle: "Connection request + post-accept sequence. Cold, no prior relationship.",
-      screens: [
+      kinds: ["connection", "message"],
+      subtitle: "Connection request, then a message sequence after the accept. Cold, no prior relationship.",
+      steps: [
         {
-          id: "A0-compose", type: "invite_compose", label: "A0 · Connection request note", sub: "Variant A1 — post-reactive (Tier 1–2 only) · what the sender types",
-          note: A0_NOTE, chips: ["300 char cap"],
-          notes: "Sent from the prospect's profile: ··· → Personalize invite. Free accounts are capped at 200 characters and a monthly quota; the 300 cap applies to Premium seats. {{personalization_short}} must be ≤120 chars or the note overflows."
+          id: "A0", label: "A0", title: "Connection request", day: null, dayText: "Before the accept",
+          variants: [
+            { id: "A0-compose", type: "invite_compose", kinds: ["connection"], variant: "Variation 1 · post-reactive note · as typed by the sender", note: A0_NOTE },
+            { id: "A0-received", type: "invite_received", kinds: ["connection"], variant: "Variation 1 · post-reactive note · as the prospect sees it", note: A0_NOTE },
+            { id: "A0-live-role", type: "invite_received", kinds: ["connection"], variant: "Variation 2 · LIVE · role-based, no research field", note: A0_LIVE_ROLE },
+            { id: "A0-live-webinar", type: "invite_received", kinds: ["connection"], variant: "Variation 3 · LIVE · webinar-led, no research field", note: A0_LIVE_WEBINAR },
+            { id: "A0-bare", type: "invite_received", kinds: ["connection"], variant: "Variation 4 · no note", note: null }
+          ]
         },
+        { id: "A1", label: "A1", title: "Thank-you", day: 0, variants: [{ id: "A1", type: "thread", kinds: ["message"], variant: "", messages: [mA1] }] },
+        { id: "A2", label: "A2", title: "Value, no ask", day: 3, variants: [{ id: "A2", type: "thread", kinds: ["message"], variant: "", messages: [mA1, mA2] }] },
         {
-          id: "A0-received", type: "invite_received", label: "A0 · Connection request note", sub: "Variant A1 — as the prospect sees it (My Network → Invitations)",
-          note: A0_NOTE, chips: [],
-          notes: "Zero links in the note. It buys the accept, nothing else. Reply-to-note does not accept the invitation, so the thread only opens once they tap Accept."
+          id: "A3", label: "A3", title: "The queries", day: 7,
+          variants: [
+            { id: "A3-v2", type: "thread", kinds: ["message"], variant: "Variation 1 · new", messages: [mA1, mA2, mA3v2] },
+            { id: "A3-v1", type: "thread", kinds: ["message"], variant: "Variation 2 · previous", messages: [mA1, mA2, mA3v1] }
+          ]
         },
-        {
-          id: "A0-live-role", type: "invite_compose", label: "A0 · LIVE note (option 1)", sub: "No AI research needed · role-based",
-          note: A0_LIVE_ROLE, chips: ["LIVE"],
-          notes: "LIVE track: uses only CRM fields (first name, company). Benchmarks put the acceptance sweet spot at 120–180 characters; this sits just above, so trim the middle sentence if acceptance lags."
-        },
-        {
-          id: "A0-live-webinar", type: "invite_received", label: "A0 · LIVE note (option 2)", sub: "No AI research needed · webinar-led · as the prospect sees it",
-          note: A0_LIVE_WEBINAR, chips: ["LIVE"],
-          notes: "LIVE track: names the masterclass as the reason to connect without a link (links in notes read as spam). Pairs with A5 or B1-LIVE for the registration ask."
-        },
-        {
-          id: "A0-bare", type: "invite_received", label: "A0 · Connection request", sub: "Variant A2 — no personalization available · send the request bare",
-          note: null, chips: ["No note"],
-          notes: "Tier 5 fallback: when there is nothing specific to say, send no note at all. Accept rates on unpersonalised notes sit below the no-note baseline."
-        },
-        {
-          id: "A1", type: "thread", label: "A1 · Day 0 after accept", sub: "The thank-you that isn't a pitch", chips: [],
-          messages: [mA1],
-          notes: "Why it works: names the exact pain in the prospect's own vocabulary, then asks a question that's genuinely easy to answer either way. \"We've got it solved\" is a useful reply too — it tells you to move on."
-        },
-        {
-          id: "A2", type: "thread", label: "A2 · Day 3", sub: "Value, no ask", chips: [],
-          messages: [mA1, mA2],
-          notes: "No link. No CTA. This message exists purely to prove you know the platform."
-        },
-        {
-          id: "A3-v2", type: "thread", label: "A3 · Day 7", sub: "The queries — first link · NEW VERSION", chips: ["To approve"],
-          messages: [mA1, mA2, mA3v2],
-          notes: "Correct one to be approved. Opens by continuing A2's CPU check rather than restarting the pitch. First link in the sequence; LinkedIn will unfurl it into the preview card unless it is removed before sending."
-        },
-        {
-          id: "A3-v1", type: "thread", label: "A3 · Day 7", sub: "The queries — previous version, for comparison", chips: ["Previous"],
-          messages: [mA1, mA2, mA3v1],
-          notes: "Superseded by the version marked To approve."
-        },
-        {
-          id: "A4", type: "thread", label: "A4 · Day 12", sub: "The ask", chips: [],
-          messages: [mA1, mA2, mA3v2, mA4],
-          notes: "Only hard CTA in the sequence. The exit line gives permission to say no, which is what keeps the thread alive for A5."
-        },
-        {
-          id: "A5", type: "thread", label: "A5 · Day 25", sub: "Soft revival — only if no reply to A1–A4", chips: ["Conditional"],
-          messages: [mA1, mA2, mA3v2, mA4, mA5],
-          notes: "Cap the sequence at 5 touches. Kill on any reply, including negative ones, and route to a human. Note the copy says 30 + 15 minutes; the live page says 45 minutes plus Q&A."
-        }
+        { id: "A4", label: "A4", title: "The ask", day: 12, variants: [{ id: "A4", type: "thread", kinds: ["message"], variant: "", messages: [mA1, mA2, mA3v2, mA4] }] },
+        { id: "A5", label: "A5", title: "Soft revival", day: 25, variants: [{ id: "A5", type: "thread", kinds: ["message"], variant: "", messages: [mA1, mA2, mA3v2, mA4, mA5] }] }
       ]
     },
     {
       id: "B",
       title: "Campaign B — Message",
-      subtitle: "Direct messages to existing 1st-degree connections, open profiles, or InMail. No connection step.",
-      screens: [
+      kinds: ["message", "inmail"],
+      subtitle: "Direct messages to existing 1st-degree connections and open profiles, or InMail. No connection step.",
+      steps: [
         {
-          id: "B1", type: "thread", label: "B1 · Day 0", sub: "The 9-word open", chips: [],
-          messages: [S(0, "9:12 am", B1)],
-          notes: "Deliberately tiny. First-degree connections reply to questions, not to paragraphs. The \"or is it under control\" half is what makes it answerable: it gives permission to say no, which is why people say something.<br><br><b>Branch on the reply</b><br>\"Yes / it's a problem\" → B2-hot<br>\"It's fine / not now\" → B3-park, then stop<br>No reply after 4 days → B2-cold"
+          id: "B1", label: "B1", title: "The open", day: 0,
+          variants: [
+            { id: "B1", type: "thread", kinds: ["message", "inmail"], variant: "Variation 1 · the 9-word open", messages: [mB1] },
+            { id: "B1-live", type: "thread", kinds: ["message", "inmail"], variant: "Variation 2 · LIVE · webinar-led", messages: [S(0, B1_LIVE_WEBINAR)] }
+          ]
         },
         {
-          id: "B1-live", type: "thread", label: "B1 · LIVE webinar-led", sub: "Direct-to-registration variant of the open", chips: ["LIVE"],
-          messages: [S(0, "9:12 am", B1_LIVE_WEBINAR)],
-          notes: "LIVE track: same question, but the webinar is the answer for a \"yes\". Use when the goal of the send is seats, not conversations. Same branching as B1."
-        },
-        {
-          id: "B2-hot", type: "thread", label: "B2-hot · same day", sub: "After a positive reply", chips: ["Sample reply shown"],
-          messages: [S(0, "9:12 am", B1), P(0, "9:40 am", B_REPLY_HOT), S(0, "9:52 am", B2_HOT)],
-          notes: "The prospect's reply is a sample to show the branch in context. Ends on the spend question so the reply qualifies the deal, not just the interest."
-        },
-        {
-          id: "B2-cold", type: "thread", label: "B2-cold · Day 4", sub: "No reply to B1", chips: [],
-          messages: [S(0, "9:12 am", B1), S(4, "9:15 am", B2_COLD)],
-          notes: "Leaves value and closes the loop. Sequence ends here."
-        },
-        {
-          id: "B3-park", type: "thread", label: "B3-park", sub: "After a \"not now\"", chips: ["Sample reply shown"],
-          messages: [S(0, "9:12 am", B1), P(0, "9:38 am", B_REPLY_PARK), S(0, "10:03 am", B3_PARK)],
-          notes: "That last question converts about as often as any hard CTA in the sequence, because it's the actual question and people like answering it."
+          id: "B2", label: "B2", title: "Follow-up", day: null, dayText: "Day 0 after a reply, Day 4 with no reply",
+          variants: [
+            { id: "B2-hot", type: "thread", kinds: ["message"], variant: "B2-hot · after a positive reply · Day 0", messages: [mB1, P(0, B_REPLY_HOT), SA(0, B2_HOT)] },
+            { id: "B2-cold", type: "thread", kinds: ["message", "inmail"], variant: "B2-cold · no reply · Day 4", messages: [mB1, S(4, B2_COLD)] },
+            { id: "B3-park", type: "thread", kinds: ["message"], variant: "B3-park · after a \"not now\" · Day 0", messages: [mB1, P(0, B_REPLY_PARK), SA(0, B3_PARK)] }
+          ]
         }
       ]
     },
     {
       id: "C",
       title: "Campaign C — Webinar / Event",
-      subtitle: "For LinkedIn Event registrants, attendees, and no-shows. Warmest list you have.",
-      screens: [
+      kinds: ["message"],
+      subtitle: "Messages to event registrants: attendees and no-shows.",
+      steps: [
         {
-          id: "C1", type: "thread", label: "C1 · Attendee, day after", sub: "Thanks + the threshold", chips: [],
-          messages: [S(0, "8:55 am", C1)],
-          notes: "Repeats the single most-quoted number from the session and points at where it lives."
+          id: "C1", label: "C1 / C2", title: "Day after the event", day: 0,
+          variants: [
+            { id: "C1", type: "thread", kinds: ["message"], variant: "C1 · attendee", messages: [S(0, C1)] },
+            { id: "C2-v2", type: "thread", kinds: ["message"], variant: "C2 · no-show · Variation 1 · new", messages: [S(0, C2_V2)] },
+            { id: "C2-v1", type: "thread", kinds: ["message"], variant: "C2 · no-show · Variation 2 · previous", messages: [S(0, C2_V1)] }
+          ]
         },
-        {
-          id: "C2-v2", type: "thread", label: "C2 · No-show, day after", sub: "NEW VERSION", chips: ["To approve"],
-          messages: [S(0, "8:58 am", C2_V2)],
-          notes: "To be approved. No first-name merge in this version, so it reads identically for every no-show. {{replay_url}} has no live page yet; the sample falls back to the webinar page."
-        },
-        {
-          id: "C2-v1", type: "thread", label: "C2 · No-show, day after", sub: "Previous version, for comparison", chips: ["Previous"],
-          messages: [S(0, "8:58 am", C2_V1)],
-          notes: "Superseded by the version marked To approve."
-        },
-        {
-          id: "C3", type: "thread", label: "C3 · Either, day 5", sub: "Attendee or no-show", chips: [],
-          messages: [S(0, "8:55 am", C1), S(4, "9:20 am", C3)],
-          notes: "Shown after C1; the same message follows C2 for no-shows."
-        }
+        { id: "C3", label: "C3", title: "Either", day: 4, variants: [{ id: "C3", type: "thread", kinds: ["message"], variant: "", messages: [S(0, C1), S(4, C3)] }] }
       ]
     }
   ];
 
-  window.LI_DATA = { SEP, sender, prospect, tokens, previews, linkChecks, linkCheckedAt, baseDate, campaigns };
+  // Flat list kept for the scorecard page.
+  campaigns.forEach(c => { c.screens = c.steps.flatMap(st => st.variants.map(v => Object.assign({ label: `${st.label} · ${st.title}`, sub: v.variant }, v))); });
+
+  window.LI_DATA = { SEP, sender, prospect, tokens, previews, linkChecks, linkCheckedAt, campaigns };
 })();

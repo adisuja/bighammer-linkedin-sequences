@@ -1,8 +1,7 @@
 (function () {
   const D = window.LI_DATA;
-  const state = { mode: "sample", preview: true, notes: true, scale: 0.85 };
+  const state = { mode: "sample", preview: true, scale: 0.85 };
 
-  // ---------- icons (paths drawn to match the LinkedIn iOS glyph set) ----------
   const I = {
     back: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H5"/><path d="M11 6l-6 6 6 6"/></svg>',
     more: '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg>',
@@ -17,14 +16,15 @@
     battery: '<svg width="28" height="13" viewBox="0 0 28 13"><rect x=".6" y=".6" width="24" height="11.8" rx="3.4" fill="none" stroke="rgba(0,0,0,.35)" stroke-width="1.2"/><rect x="2.2" y="2.2" width="20.8" height="8.6" rx="2" fill="#000"/><path d="M26.2 4.4v4.2a2.2 2.2 0 0 0 0-4.2z" fill="rgba(0,0,0,.4)"/></svg>'
   };
 
-  // ---------- helpers ----------
+  const KIND = { connection: "Connection request", message: "Message", inmail: "InMail" };
+  const badges = (kinds) => `<div class="kinds">${kinds.map(k => `<span class="kind ${k}">${KIND[k]}</span>`).join("")}</div>`;
+
   const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   const URL_RE = /(https?:\/\/[^\s<]+|\b(?:[a-z0-9-]+\.)+(?:com|ai|io|net|org|co)\b(?:\/[^\s<]*)?)/gi;
 
   function fill(text, mode) {
     return String(text).replace(/\{\{(\w+)\}\}/g, (m, k) => (mode === "sample" ? (D.tokens[k] ?? m) : m));
   }
-
   function rich(text) {
     let html = esc(fill(text, state.mode));
     html = html.replace(URL_RE, (m) => {
@@ -34,128 +34,89 @@
       const href = /^https?:/i.test(m) ? m : "https://" + m;
       return `<a class="lnk" href="${esc(href)}" target="_blank" rel="noopener">${esc(m)}</a>${trail}`;
     });
-    html = html.replace(/\{\{(\w+)\}\}/g, '<span class="tok">{{$1}}</span>');
-    return html;
+    return html.replace(/\{\{(\w+)\}\}/g, '<span class="tok">{{$1}}</span>');
   }
-
   function firstPreview(text) {
-    const filled = fill(text, "sample");
-    const m = filled.match(URL_RE);
+    const m = fill(text, "sample").match(URL_RE);
     if (!m) return "";
-    let u = m[0].replace(/[.,;:!?)]+$/, "");
+    const u = m[0].replace(/[.,;:!?)]+$/, "");
     const href = /^https?:/i.test(u) ? u : "https://" + u;
     let host; try { host = new URL(href).hostname.replace(/^www\./, ""); } catch { return ""; }
     const p = D.previews[host];
     if (!p) return "";
-    const cal = host === "calendly.com";
-    return `<a class="prev" href="${esc(href)}" target="_blank" rel="noopener"><div class="prev-img ${cal ? "cal" : ""}"></div><div class="prev-txt"><div class="prev-title">${esc(p.title)}</div><div class="prev-dom">${esc(p.domain)}</div></div></a>`;
-  }
-
-  function dayLabel(day, curDay) {
-    const diff = curDay - day;
-    if (diff === 0) return "Today";
-    if (diff === 1) return "Yesterday";
-    const d = new Date(D.baseDate); d.setDate(d.getDate() + day);
-    if (diff < 7) return d.toLocaleDateString("en-US", { weekday: "long" });
-    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  }
-  function absDate(day) {
-    const d = new Date(D.baseDate); d.setDate(d.getDate() + day);
-    return d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+    return `<a class="prev" href="${esc(href)}" target="_blank" rel="noopener"><div class="prev-img ${host === "calendly.com" ? "cal" : ""}"></div><div class="prev-txt"><div class="prev-title">${esc(p.title)}</div><div class="prev-dom">${esc(p.domain)}</div></div></a>`;
   }
 
   const av = (who, size, presence) =>
     `<span class="av" style="width:${size}px;height:${size}px;background:${who.color};font-size:${Math.round(size * .38)}px">${esc(who.initials)}${presence ? '<i class="presence"></i>' : ""}</span>`;
-
-  const statusBar = () => `<div class="sb"><span class="sb-time">9:41</span><span class="sb-icons">${I.signal}${I.wifi}${I.battery}</span></div>`;
+  const statusBar = () => `<div class="sb"><span class="sb-time">10:00</span><span class="sb-icons">${I.signal}${I.wifi}${I.battery}</span></div>`;
   const composer = () => `<div class="composer"><span class="ic">${I.clip}</span><div class="input">Write a message...</div><span class="ic">${I.mic}</span></div>`;
   const phone = (inner) => `<div class="phone-wrap"><div class="phone"><div class="screen">${inner}</div><div class="island"></div></div></div>`;
 
-  // ---------- screens ----------
   function threadScreen(scr) {
-    const msgs = scr.messages, cur = msgs[msgs.length - 1], curDay = cur.day;
-    const P = D.prospect, S = D.sender;
+    const msgs = scr.messages, P = D.prospect, S = D.sender;
     let body = `<div class="profile">${av(P, 56, true)}<div class="name">${esc(P.name)} <span>· 1st</span></div><div class="head">${esc(P.headline)}</div></div>`;
     let lastDay = null;
     msgs.forEach((m, i) => {
-      if (m.day !== lastDay) { body += `<div class="sep">${dayLabel(m.day, curDay)}</div>`; lastDay = m.day; }
-      const who = m.from === "sender" ? S : P;
-      const last = i === msgs.length - 1;
+      if (m.day !== lastDay) { body += `<div class="sep">Day ${m.day}</div>`; lastDay = m.day; }
+      const who = m.from === "sender" ? S : P, last = i === msgs.length - 1;
       body += `<div class="msg ${m.from}${last ? " cur" : ""}">${av(who, 28)}<div class="msg-body"><div class="msg-head"><span class="msg-name">${esc(who.name)}</span><span class="msg-time">· ${esc(m.time)}</span></div><div class="msg-text">${rich(m.text)}</div>${m.from === "sender" ? firstPreview(m.text) : ""}</div>${last && m.from === "sender" ? `<span class="sent">${I.check}</span>` : ""}</div>`;
     });
     body += `<div style="height:10px"></div>`;
     return `${statusBar()}<div class="nav"><span class="ic">${I.back}</span><div class="nav-title"><div class="nav-name">${esc(P.name)}</div><div class="nav-sub"><i class="dot"></i>Active now</div></div><span class="ic">${I.more}</span><span class="ic">${I.star}</span></div><div class="body" data-scroll="bottom">${body}</div>${composer()}<div class="home"></div>`;
   }
-
   function inviteComposeScreen(scr) {
     const n = fill(scr.note, "sample").length;
     return `${statusBar()}<div class="nav"><span class="ic">${I.x}</span><div class="nav-center">Personalize invitation</div><span class="ic-spacer"></span></div><div class="body inv-compose"><div class="inv-label">Include a note with your invitation (optional)</div><div class="inv-note">${rich(scr.note)}</div><div class="inv-count${n > 300 ? " over" : ""}">${n}/300</div></div><div class="inv-footer"><button class="btn-primary">Connect</button></div><div class="home"></div>`;
   }
-
   function inviteReceivedScreen(scr) {
     const S = D.sender;
     const note = scr.note ? `<div class="inv-msg">${rich(scr.note)}</div>` : "";
     const filler = [
-      { initials: "JK", color: "#8a5a2b", name: "Jonas Keller", head: "Staff Data Engineer at Northwind" },
-      { initials: "LM", color: "#3d5a80", name: "Lucía Márquez", head: "Analytics Engineering Lead" }
+      { initials: "JC", color: "#8a5a2b", name: "James Carter", head: "Staff Data Engineer at Northwind" },
+      { initials: "EW", color: "#3d5a80", name: "Emily Watson", head: "Analytics Engineering Lead" }
     ].map(f => `<div class="sugg-row">${av(f, 48)}<div class="t"><b>${f.name}</b>${f.head}</div><span class="pill">Connect</span></div>`).join("");
     return `${statusBar()}<div class="nav"><span class="ic">${I.back}</span><div class="nav-title"><div class="nav-name">Invitations</div></div></div><div class="body"><div class="inv-tabs"><span class="pillf on">People</span><span class="pillf">Pages</span><span class="pillf">Events</span></div><div class="inv-count-line">Received (1)</div><div class="inv-card">${av(S, 56)}<div class="inv-main"><div class="inv-name">${esc(S.name)}</div><div class="inv-head">${esc(S.headline)}</div><div class="inv-mut">${I.people} 4 mutual connections</div>${note}<div class="inv-actions"><span class="pill pill-fill">Accept</span><span class="pill">Ignore</span></div></div></div><div class="inv-sugg">People you may know</div>${filler}</div><div class="home"></div>`;
   }
 
-  // ---------- page ----------
-  function chipHtml(c) {
-    const cls = /approve/i.test(c) ? "approve" : /previous/i.test(c) ? "prev" : /sample/i.test(c) ? "sample" : /^live/i.test(c) ? "live" : /research|down/i.test(c) ? "research" : "";
-    return `<span class="chip ${cls}">${esc(c)}</span>`;
-  }
-  function allText(scr) { return scr.type === "thread" ? scr.messages.filter(m => m.from === "sender").map(m => m.text).join("\n") : (scr.note || ""); }
-  function autoChips(scr) {
-    const chips = (scr.chips || []).slice();
-    if (/\{\{personalization_short\}\}/.test(allText(scr))) chips.push("Needs AI research");
-    else if (!chips.some(c => /^live$/i.test(c))) chips.push("Live-ready");
-    if (/calendly\.com/.test(allText(scr))) chips.push("Calendly link down");
-    return chips;
-  }
-
-  function currentText(scr) {
-    if (scr.type === "thread") return scr.messages[scr.messages.length - 1].text;
-    return scr.note || "";
-  }
+  function currentText(scr) { return scr.type === "thread" ? scr.messages[scr.messages.length - 1].text : (scr.note || ""); }
+  const words = (t) => t.trim().split(/\s+/).filter(Boolean).length;
 
   function card(scr) {
     let screen, meta;
     if (scr.type === "thread") {
       screen = threadScreen(scr);
-      const cur = scr.messages[scr.messages.length - 1];
-      const txt = fill(cur.text, "sample");
-      meta = `${txt.length} chars · ${txt.trim().split(/\s+/).length} words · Day ${cur.day} (${absDate(cur.day)})`;
-    } else if (scr.type === "invite_compose") {
-      screen = inviteComposeScreen(scr);
-      meta = `${fill(scr.note, "sample").length}/300 chars with sample data`;
+      const cur = scr.messages[scr.messages.length - 1], txt = fill(cur.text, "sample");
+      meta = `${words(txt)} words · ${txt.length} chars · Day ${cur.day} · 10 AM`;
     } else {
-      screen = inviteReceivedScreen(scr);
-      meta = scr.note ? `${fill(scr.note, "sample").length}/300 chars with sample data` : "No note attached";
+      screen = scr.type === "invite_compose" ? inviteComposeScreen(scr) : inviteReceivedScreen(scr);
+      const txt = scr.note ? fill(scr.note, "sample") : "";
+      meta = scr.note ? `${words(txt)} words · ${txt.length}/300 chars` : "No note";
     }
     const copyBtn = currentText(scr) ? `<button class="copy" data-copy="${esc(scr.id)}">Copy text</button>` : "";
     return `<article class="card" id="${esc(scr.id)}">
-      <header class="card-head"><div class="card-label">${esc(scr.label)}</div><div class="card-sub">${esc(scr.sub)}</div><div class="chips">${autoChips(scr).map(chipHtml).join("")}</div></header>
+      <header class="card-head">${badges(scr.kinds)}${scr.variant ? `<div class="card-sub">${esc(scr.variant)}</div>` : ""}</header>
       ${phone(screen)}
-      <footer class="card-foot"><div class="foot-row"><div class="meta">${meta}</div>${copyBtn}</div>${scr.notes ? `<div class="note">${scr.notes}</div>` : ""}</footer>
+      <footer class="card-foot"><div class="foot-row"><div class="meta">${meta}</div>${copyBtn}</div></footer>
     </article>`;
   }
 
   function render() {
     const main = document.getElementById("main");
     const links = `<section class="campaign linkcheck" id="links"><div class="campaign-head"><h2>Link check</h2><p>Every URL used in the copy, tested ${esc(D.linkCheckedAt)}. Links inside the phones open in a new tab.</p></div><table class="ltable"><thead><tr><th>URL</th><th>Status</th><th>Page title</th></tr></thead><tbody>${D.linkChecks.map(l => `<tr><td>${/^https?:/.test(l.url) ? `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.url)}</a>` : `<span class="tok">${esc(l.url)}</span>`}</td><td><span class="st ${l.status === 200 ? "ok" : l.status === "broken" ? "bad" : "warn"}">${l.status === 200 ? "200 OK · verified visually" : l.status === "broken" ? "BROKEN" : l.status === "warn" ? "200 · stale date in HTML" : "not live yet"}</span></td><td>${esc(l.title)}</td></tr>`).join("")}</tbody></table></section>`;
-    main.innerHTML = D.campaigns.map(c => `<section class="campaign" id="campaign-${c.id}"><div class="campaign-head"><h2>${esc(c.title)}</h2><p>${esc(c.subtitle)}</p></div><div class="rail">${c.screens.map(card).join("")}</div></section>`).join("") + links;
+    main.innerHTML = D.campaigns.map(c => `<section class="campaign" id="campaign-${c.id}">
+      <div class="campaign-head"><div class="campaign-title"><h2>${esc(c.title)}</h2>${badges(c.kinds)}</div><p>${esc(c.subtitle)}</p></div>
+      <div class="rail">${c.steps.map((st, i) => `<div class="step" id="step-${esc(st.id)}">
+        <div class="step-head"><span class="step-num">${i + 1}</span><div><div class="step-label">${esc(st.label)} · ${esc(st.title)}</div><div class="step-day">${st.day === null ? esc(st.dayText || "") : `Day ${st.day} · 10 AM`}${st.variants.length > 1 ? ` · ${st.variants.length} variations` : ""}</div></div></div>
+        <div class="stack">${st.variants.map(card).join("")}</div>
+      </div>${i < c.steps.length - 1 ? '<div class="arrow">→</div>' : ""}`).join("")}</div>
+    </section>`).join("") + links;
     main.querySelectorAll('.body[data-scroll="bottom"]').forEach(b => { b.scrollTop = b.scrollHeight; });
-    const nav = document.getElementById("sidenav");
-    nav.innerHTML = D.campaigns.map(c => `<h4>${esc(c.title)}</h4>` + c.screens.map(s => {
-      const tag = (s.chips || []).find(x => /approve|previous|^live$/i.test(x));
-      return `<a href="#${esc(s.id)}" data-target="${esc(s.id)}">${esc(s.label)}${tag ? `<span class="tag ${/previous/i.test(tag) ? "prev" : /live/i.test(tag) ? "live" : ""}">${esc(tag)}</span>` : ""}</a>`;
-    }).join("")).join("") + `<h4>More</h4><a href="scorecard.html">Benchmark scorecard →</a><a href="#links" data-target="links">Link check</a>`;
+    document.getElementById("sidenav").innerHTML = D.campaigns.map(c => `<h4>${esc(c.title)}</h4>` + c.steps.map(st =>
+      `<a href="#step-${esc(st.id)}" data-target="step-${esc(st.id)}">${esc(st.label)} · ${esc(st.title)}${st.variants.length > 1 ? `<span class="tag">${st.variants.length} var</span>` : ""}</a>`
+    ).join("")).join("") + `<h4>More</h4><a href="scorecard.html">Benchmark scorecard →</a><a href="#links" data-target="links">Link check</a>`;
   }
 
-  // ---------- events ----------
   document.addEventListener("click", (e) => {
     const nav = e.target.closest("[data-target]");
     if (nav) {
@@ -171,8 +132,7 @@
     const cp = e.target.closest("[data-copy]");
     if (cp) {
       const scr = D.campaigns.flatMap(c => c.screens).find(s => s.id === cp.dataset.copy);
-      const txt = fill(currentText(scr), state.mode);
-      navigator.clipboard.writeText(txt).then(() => toast("Copied " + (state.mode === "sample" ? "with sample data" : "with raw {{tokens}}")));
+      navigator.clipboard.writeText(fill(currentText(scr), state.mode)).then(() => toast("Copied " + (state.mode === "sample" ? "with sample data" : "with raw {{tokens}}")));
       return;
     }
     const seg = e.target.closest(".seg button");
@@ -183,7 +143,6 @@
     }
   });
   document.getElementById("tgl-preview").addEventListener("change", (e) => { document.body.classList.toggle("no-preview", !e.target.checked); rescroll(); });
-  document.getElementById("tgl-notes").addEventListener("change", (e) => document.body.classList.toggle("no-notes", !e.target.checked));
 
   function goTo(el, instant) {
     const behavior = instant ? "auto" : "smooth";
@@ -194,14 +153,14 @@
   }
   function rescroll() { document.querySelectorAll('.body[data-scroll="bottom"]').forEach(b => { b.scrollTop = b.scrollHeight; }); }
   let tt; function toast(msg) { const t = document.getElementById("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(tt); tt = setTimeout(() => t.classList.remove("show"), 1600); }
-
   function applyScale() {
     const fit = window.innerWidth < 900 ? Math.min(state.scale, (window.innerWidth - 32) / 417) : state.scale;
     document.documentElement.style.setProperty("--s", fit.toFixed(3));
   }
   window.addEventListener("resize", applyScale);
+
   const initial = location.hash.slice(1);
-  if (initial) history.replaceState(null, "", location.pathname + location.search); // stop the native anchor jump into the rail
+  if (initial) history.replaceState(null, "", location.pathname + location.search);
   applyScale();
   render();
   if (initial) { const a = document.querySelector(`[data-target="${CSS.escape(initial)}"]`); if (a) { a.dataset.instant = "1"; setTimeout(() => a.click(), 60); } }
