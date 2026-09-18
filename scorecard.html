@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Benchmark scorecard · BigHammer.ai LinkedIn sequences</title>
 <meta name="robots" content="noindex, nofollow">
-<link rel="stylesheet" href="styles.css?v=7">
+<link rel="stylesheet" href="styles.css?v=8">
 <style>
   .doc{max-width:960px;margin:0 auto;padding:28px 24px 80px;font-size:15px;line-height:1.55;color:#1d1d1f}
   .doc h1{font-size:28px;letter-spacing:-.3px;margin:0 0 6px}
@@ -52,13 +52,13 @@
   <p class="lede">Scored against the largest 2025–26 outreach datasets (Expandi 13.2M requests, Belkins 15–20M touchpoints, Reachium 180K requests, ReactIn 80K) and 2026 B2B webinar benchmarks (ON24/GoTo/BrightTALK via Digital Applied, Goldcast, Contrast). The objective is not a booked demo. It is a registered, reminded, attending prospect at <a href="https://webinar.bighammerai.com/" target="_blank" rel="noopener">webinar.bighammerai.com</a> (Thu 15 Oct 2026, 12:00 PM ET, 45 min + Q&amp;A).</p>
 
   <div class="score-hero">
-    <div class="sc"><div class="n">7.6<small>/10</small></div><div class="l">As conversation-starters. Top-quartile craft: question-led closes, permission to say no, real technical proof, capped touches.</div></div>
-    <div class="sc"><div class="n">5.4<small>/10</small></div><div class="l">As a webinar-attendance engine, as currently sequenced. The webinar is the last, conditional touch in A; absent from B; C has no pre-event reminders.</div></div>
-    <div class="sc"><div class="n">8.6<small>/10</small></div><div class="l">Projected after the five fixes below. The copy quality is already there; the sequencing and the reminder layer are what is missing.</div></div>
+    <div class="sc"><div class="n" id="heroCraft">–<small>/10</small></div><div class="l">Craft, mean of the table below. Top-quartile conversation-starters: question-led closes, permission to say no, real technical proof, capped touches.</div></div>
+    <div class="sc"><div class="n" id="heroWeb">–<small>/10</small></div><div class="l">Webinar alignment, mean of the table below (<span id="heroWebCur"></span> for the messages as currently sequenced). The webinar is the last, conditional touch in A, absent from B, and C starts after the event.</div></div>
+    <div class="sc"><div class="n" id="heroAll">–<small>/10</small></div><div class="l">Weighted overall, mean of the table below. Our judgment, not a measurement: the sequencing fixes below would lift the webinar axis into the 7s and the overall into the low 8s, because the copy quality is already there.</div></div>
   </div>
 
   <p class="src" id="avgline"></p>
-  <p class="src">The first two numbers are sequence-level judgments: how the campaigns work as systems (ordering, branching, what reaches whom). The per-message averages from the table in section 2 are shown above for comparison; they run lower on the webinar axis because most messages have no reason to mention the event. The third number is a projection, not a measurement.</p>
+  <p class="src">All three headline numbers are computed from the per-message table in section 2 (weights: craft 45%, webinar alignment 35%, link/CTA hygiene 10%, operability without AI research 10%; the last two are near-constant, so the overall is effectively 0.45 × craft + 0.35 × webinar + 1.8). The webinar axis runs low partly by design: most messages have no reason to mention the event. This scorecard was checked by a second review pass that re-fetched every cited source; corrections from that pass are incorporated below.</p>
 
   <h2>1. What "best in the world" looks like, in numbers</h2>
   <table class="t">
@@ -67,15 +67,15 @@
       <tr><td>Connection acceptance (cold)</td><td class="num">27–28.5%</td><td class="num">&gt;35%</td><td>Expandi 13.2M · Reachium 180K · GTM Bud</td></tr>
       <tr><td>Reply to a connection-request note</td><td class="num">2.2–3.0% (falling 37% YoY)</td><td class="num">&gt;5%</td><td>Expandi H2 2026</td></tr>
       <tr><td>Reply to a post-accept message</td><td class="num">7.2–10.4%</td><td class="num">&gt;15%</td><td>Belkins · Expandi</td></tr>
-      <tr><td>Reply, message to existing 1st-degree</td><td class="num">12.2–16.9%</td><td class="num">25–35% personalised</td><td>Belkins 12.2% · Expandi earlier benchmark post 16.9% (vs 8.6% template campaigns)</td></tr>
-      <tr><td>Note vs no note</td><td colspan="2">Sources disagree on acceptance: Belkins (20M+) sees no difference (26.4% vs 26.4%); ReactIn (80K) sees blank requests win outright (55–68% vs 28–45%). Both agree a generic note is the worst option and that a real-context note lifts post-accept replies (Belkins: 8.2–9.4% vs 5.3–5.4%).</td><td>Belkins · ReactIn</td></tr>
+      <tr><td>Reply, message to existing 1st-degree</td><td class="num">12.2%</td><td class="num">&gt;20%</td><td>Belkins (vs 7.2% across all touchpoints). Vendor claims of 17–35% for warm messenger campaigns exist but could not be traced to a published dataset.</td></tr>
+      <tr><td>Note vs no note</td><td colspan="2">Sources disagree on acceptance: Belkins (15M+) sees a small edge for blank requests (27.6% vs 25.3% with a note; an earlier edition had them level at 26.4%); ReactIn (80K) sees blank requests win outright (55–68% vs 28–45%, figures that sit well above every other dataset's baseline). Both agree a generic note is the worst option and that a real-context note lifts post-accept replies (Belkins: 8.2% vs 5.3%).</td><td>Belkins · ReactIn</td></tr>
       <tr><td>Note length that wins acceptance</td><td colspan="2">120–180 characters (cap is 300 Premium / 200 free)</td><td>Crispy · ReactIn · LinkedIn Help</td></tr>
       <tr><td>Message length</td><td colspan="2">Under 400 characters: +22% response. Over 1,200: −11%.</td><td>LinkedIn first-party InMail data</td></tr>
-      <tr><td>Follow-ups</td><td colspan="2">First follow-up adds ~0; second follow-up adds +4.05 pts. Four touches minimum before judging.</td><td>Expandi earlier benchmark post (70K campaigns) · Waalaxy</td></tr>
+      <tr><td>Follow-ups</td><td colspan="2">Reply rates decline per touch (Expandi H2 2026: message 2 at 8.8%, message 3 near 7%) but each touch still adds replies; practitioner guidance is four touches before judging a sequence.</td><td>Expandi H2 2026 · Waalaxy</td></tr>
       <tr><td>Accepted → booked meeting</td><td class="num">2.0%</td><td class="num">3%+</td><td>Reachium</td></tr>
-      <tr><td>B2B webinar live attendance</td><td class="num">41.6% median (40–45% planning band)</td><td class="num">&gt;55% top quartile</td><td>Digital Applied 12.4K webinars · Contrast · Goldcast</td></tr>
-      <tr><td>Reminder cadence</td><td colspan="2">3 reminders (1 day, 1 hour, 5 min) = +27% live attendance. Telling registrants the recording will be sent is common practitioner advice for reducing no-shows; no dataset in the sources quantifies it.</td><td>Contrast · Wave Connect</td></tr>
-      <tr><td>Format</td><td colspan="2">Length is contested: Digital Applied finds 35–45 minutes wins on attendance and retention; Contrast reports 90-minute sessions out-attending 30-minute ones (67% vs 44%). Tue–Thu, late morning US is the consensus window. Replays reach roughly 2.4× the live audience.</td><td>Digital Applied · Contrast · Goldcast</td></tr>
+      <tr><td>B2B webinar live attendance</td><td class="num">41.6% median (40–45% planning band)</td><td class="num">50%+ (Contrast's best day/time slots)</td><td>Digital Applied 12.4K webinars · Contrast · Goldcast</td></tr>
+      <tr><td>Reminder cadence</td><td colspan="2">3 reminder <b>emails</b> (1 day, 1 hour, 5 min) = +27% live attendance. No source quantifies LinkedIn-message reminders. Promising the recording is common practice; it likely lifts registrations and may lower live attendance, and no dataset in the sources measures it.</td><td>Contrast · Wave Connect</td></tr>
+      <tr><td>Format</td><td colspan="2">Length is contested: Digital Applied finds 35–45 minutes wins on retention (73% vs 51%); Contrast reports 90-minute sessions out-attending 30-minute ones (67% vs 44%). Best day/time also varies by source (Tue/Wed 11am ET, Tuesday 2pm, Monday). Replays reach roughly 2.4× the live audience.</td><td>Digital Applied · Contrast · Goldcast</td></tr>
     </tbody>
   </table>
   <div class="callout">Two things the best operators do that generic templates do not: they earn the accept on <b>context, not a pitch</b>, and they treat the registration as the <b>start</b> of the attendance job, not the end of it. The BigHammer copy nails the first and currently skips the second.</div>
@@ -89,31 +89,30 @@
 
   <h2>3. Where it beats the benchmark</h2>
   <ul>
-    <li><b>A0 note</b> follows the data exactly: context first, no link, no pitch, under 200 characters, and a bare request when there is no context. Most "world-class" template libraries still recommend generic notes; the data says those lose to no note at all.</li>
-    <li><b>B1</b> is the single best message in the set. A short, answerable question to 1st-degree connections is the highest-reply motion LinkedIn has (16.9% average, 25–35% when the sender is known), and the "or is it under control" clause is textbook permission-to-say-no.</li>
+    <li><b>A0 note</b> follows the data: context first, no link, no pitch, under 200 characters, and a bare request when there is no context. Many template libraries still recommend generic notes; every dataset above says those lose to no note at all.</li>
+    <li><b>B1</b> is the single best message in the set. A short, answerable question to 1st-degree connections is one of the highest-reply motions on LinkedIn (12.2% vs 7.2% across all touchpoints in Belkins' data), and the "or is it under control" clause is textbook permission-to-say-no.</li>
     <li><b>A2</b> is proof, not pitch. Naming <code>system.compute.node_timeline</code> and a concrete threshold does what a case-study link cannot on mobile: it makes the sender credible in one screen.</li>
-    <li><b>Every message ends in a question or an easy exit.</b> Branching on reply, killing on any reply, and a 5-touch cap are the controls that keep a seat's reply rate above 10% instead of drifting toward the 3% template floor.</li>
-    <li><b>A5 already carries the standard no-show reassurance</b> ("register even if the time doesn't work and you'll get the recording"), which the registration page itself does not promise yet.</li>
+    <li><b>Every message ends in a question or an easy exit.</b> Branching on reply, killing on any reply, and a 5-touch cap are the controls that keep a seat's reply rate at the 10% platform average or above instead of drifting toward the 3% that connection-note pitches get.</li>
+    <li><b>A5 already lowers the registration barrier</b> ("register even if the time doesn't work and you'll get the recording"). Note the trade-off: that line helps registrations and may cost live attendance; the registration page does not promise a recording.</li>
   </ul>
 
   <h2>4. Where it loses to the benchmark, given the webinar goal</h2>
-  <div class="fix"><b>Fix 1 — Move the webinar forward in Campaign A (biggest lever).</b>Today the masterclass is A5: day 25, conditional on silence. A free 45-minute session is a lower-friction ask than A4's 30-minute demo that needs a workspace id, so it should come <i>before</i> the demo, not after. Recommended order: A1 (thank-you) → A2 (CPU proof) → A3 (queries) → <b>A4 = masterclass invite</b> → A5 = demo offer, only if they engaged. Expected effect: the webinar CTA reaches 100% of accepted connections instead of the ~70% who never reply. Calendar check: for any connection accepted after 20 September, day 25 falls on or after 15 October, so the current A5 would invite people to a masterclass that has already happened.</div>
+  <div class="fix"><b>Fix 0 — The page and the calendar (blocking).</b>Three things gate attendance before any copy does. (a) The raw HTML of webinar.bighammerai.com still says "June 18, 2026 · 11:00 AM ET"; only the in-browser render shows 15 October, 12:00 PM ET. LinkedIn's link unfurl, search engines and anything without JavaScript therefore show a past event. Fix the served HTML before any message carrying {{webinar_url}} ships. (b) The Calendly demo link used in A4, B2-hot and C3 renders "This calendar is currently unavailable." (c) Day offsets, not dates, drive the sequence: with a 21 September start, A4 lands on Saturday 3 October and A5 on Friday 16 October, the day after the event. Anchor the invite to the calendar instead: every accepted connection gets the masterclass message by T−7, whatever step they are on.</div>
+  <div class="fix"><b>Fix 1 — Move the webinar forward in Campaign A (biggest copy lever).</b>Today the masterclass is A5: day 25, conditional on silence. A free 45-minute session is a lower-friction ask than A4's 30-minute demo that needs a workspace id, so it should come <i>before</i> the demo, not after. Recommended order: A1 (thank-you) → A2 (CPU proof) → A3 (queries) → <b>A4 = masterclass invite</b> → A5 = demo offer, only if they engaged. Expected effect: the webinar CTA reaches every accepted connection instead of only the ~90% who never replied (at a 10% reply rate) and who happen to still be in sequence on day 25.</div>
   <div class="fix"><b>Fix 2 — Give Campaign B a webinar exit.</b>B2-hot offers the queries and the demo; the masterclass is absent. For a "yes" from a 1st-degree connection the masterclass is the natural middle step. The <b>B1 · LIVE webinar-led</b> card on the preview page is the direct version; at minimum add a third option to B2-hot: "or sit in on the live teardown on {{webinar_date}}: {{webinar_url}}".</div>
-  <div class="fix"><b>Fix 3 — Add the reminder layer to Campaign C (worth ~27% more attendees).</b>Campaign C starts the day <i>after</i> the event. Attendance is decided before it. Add two LinkedIn touches to registrants: C0-a the day before, C0-b two hours before. Suggested copy:
-    <pre class="copy">{{first_name}} - tomorrow, 12pm ET. One thing to do before it if you have five minutes: pull cpu_user_percent + cpu_system_percent from system.compute.node_timeline for last week. You'll know within the first ten minutes whether the 20% / 40% threshold bites at {{company}}.
-
-Recording goes to everyone registered either way.</pre>
+  <div class="fix"><b>Fix 3 — Put the reminder layer in place (the +27% lever, measured on email).</b>Campaign C starts the day <i>after</i> the event; attendance is decided before it. Registration is an external form that captures a work email and promises "calendar invite and reminder", so first confirm the email reminders actually fire at −1 day, −1 hour and −5 minutes, since that is where the +27% is measured. Then mirror the session as a LinkedIn Event, which gives native invites and LinkedIn's own reminders, and add two LinkedIn touches to registrants you can match to a profile: C0-a the day before, C0-b two hours before. Suggested copy (deliberately no recording promise, since the goal is live seats):
+    <pre class="copy">{{first_name}} - tomorrow, 12pm ET. One thing to do before it if you have five minutes: pull cpu_user_percent + cpu_system_percent from system.compute.node_timeline for last week. You'll know within the first ten minutes whether the 20% / 40% threshold bites at {{company}}.</pre>
     <pre class="copy">Starting in two hours. Link's in your calendar invite, or here: {{webinar_url}}
 
 Bring one number if you can: your biggest all-purpose cluster's average CPU last month. It'll make the Q&A worth your time.</pre></div>
-  <div class="fix"><b>Fix 4 — Tighten the two long messages.</b>A3 (both versions) and A2 run 500–640 characters; the response-rate cliff in LinkedIn's own data starts at 400. Neither needs to lose its substance: A3 can drop the second "Genuinely no strings" paragraph to a single line, and A2 can drop the final two sentences. See the counts in the table above.</div>
-  <div class="fix"><b>Fix 5 — C2 v2 (to approve) scores below the version it replaces.</b>The previous C2 named the person, stated the fact, and handed over the recording in 330 characters. The new one drops the first-name merge, opens with a joke that needs the reader to already like you, and puts a "75%" claim in the second line, which is the one thing a no-show has not earned yet. If the team wants the lighter tone, keep the name and cut the claim: <i>"{{first_name}} - your calendar won yesterday, which is fair. Recording's here: {{replay_url}}. The short version: seven read-only queries, four findings, about half the savings need no migration at all."</i> Also: {{replay_url}} has no live page yet; until it does, C2 cannot ship.</div>
+  <div class="fix"><b>Fix 4 — Tighten the long messages (reply rate, not attendance).</b>A2 runs 520 characters and A3 603–694; LinkedIn's own InMail data puts the response-rate cliff at 400. Neither needs to lose its substance: A3 can cut the closing paragraph to one line, and A2 can drop the final two sentences. See the counts in the table above.</div>
+  <div class="fix"><b>Fix 5 — C2 v2 (to approve) scores below the version it replaces (post-event, so no effect on attendance).</b>The new version drops the first-name merge, and its second line does not parse: "But you still couldn't make it to reduce your databricks costs up to 75%, but Bighammer has got you!" has two "but"s, lowercases the product name and misspells the brand. The previous version said the same thing plainly, with the name, in roughly the same length (321 vs 339 characters). If the team wants the lighter tone, keep the name and fix the sentence: <i>"{{first_name}} - your calendar won yesterday, which is fair. Recording's here: {{replay_url}}. The short version: seven read-only queries, four findings, about half the savings need no migration at all."</i> Both versions depend on {{replay_url}}, which has no live page yet.</div>
 
   <h3>Smaller items</h3>
   <ul>
     <li><b>Consistency with the live page.</b> A5 says "30 minutes of teardown, 15 of Q&amp;A"; the registration page says 45 minutes plus live Q&amp;A, 12:00 PM ET. Match the page.</li>
     <li><b>Time zones.</b> The page lists five time zones. Include the one that matches the prospect's location in {{webinar_date}} (e.g. "Thu 15 Oct, 5pm UK").</li>
-    <li><b>Link previews.</b> LinkedIn unfurls the first URL into a card. The assessment card reads well; the Calendly card is generic. Consider removing the preview on demo asks and keeping it on the webinar link, where the page title does the selling.</li>
+    <li><b>Link previews.</b> LinkedIn unfurls the first URL into a card from the page's served HTML. The assessment card reads well; the Calendly card is generic; the webinar card will carry the stale June date until Fix 0(a) is done.</li>
     <li><b>A3 v2 opener.</b> "Guess what happens from there?" carries the continuity nicely but reads as a hook. "That CPU check is one piece of a bigger assessment" works as the first line on its own.</li>
     <li><b>Em dashes.</b> The revised copy removes them (a sensible AI-tell precaution). Every former em-dash position renders as a spaced hyphen in the previews; pick a house style (comma, hyphen or "~") once and apply it everywhere.</li>
     <li><b>Volume.</b> Acceptance peaks at 10–19 requests per seat per day (32%) and falls at 20–29 (26.7%). The doc's 20–25/day is at the top of that band; 15/day per seat is the safer default.</li>
@@ -132,7 +131,7 @@ Bring one number if you can: your biggest all-purpose cluster's average CPU last
   </ul>
   <p class="src">Caveat: most outreach datasets come from automation vendors and mix cold and warm motions; the spread between studies is real. Ranges are shown rather than single figures wherever the sources disagree.</p>
 </main>
-<script src="data.js?v=7"></script>
+<script src="data.js?v=8"></script>
 <script>
 (function(){
   const D = window.LI_DATA;
@@ -149,31 +148,37 @@ Bring one number if you can: your biggest all-purpose cluster's average CPU last
     "A3-v1":        [7.0, 3.5, "Cleaner link placement, same length problem."],
     "A4":           [7.5, 2.0, "Well-written demo ask, but it lands before the webinar was ever offered."],
     "A5":           [7.5, 8.0, "The right message in the wrong slot. Has the recording line. Move to A4."],
-    "B1":           [9.5, 3.0, "The best message here. Highest-reply motion on LinkedIn."],
+    "B1":           [9.5, 3.0, "The best message here. One of the highest-reply motions on LinkedIn."],
     "B1-live":      [8.0, 8.5, "Direct-to-seat version; keeps the permission-to-say-no exit."],
     "B2-hot":       [7.5, 2.0, "Good two-option structure; the masterclass should be one of the options."],
     "B2-cold":      [8.0, 2.5, "Clean close. Could carry the webinar link instead of the queries."],
     "B3-park":      [8.5, 3.0, "The urgency question is the smartest CTA in the set."],
     "C1":           [8.0, 7.0, "Right follow-up; one specific number, one open question."],
-    "C2-v2":        [4.5, 6.0, "Drops the name merge, leads with a joke and a 75% claim. Weaker than v1. Replay URL not live."],
-    "C2-v1":        [7.5, 7.0, "Plain, respectful, does the job in 330 chars."],
+    "C2-v2":        [4.5, 6.0, "Drops the name merge; second sentence does not parse (two \"but\"s, lowercase databricks, Bighammer). Weaker than v1."],
+    "C2-v1":        [7.5, 7.0, "Plain, respectful, does the job. Depends on a replay page that does not exist yet."],
     "C3":           [7.0, 5.0, "Fine demo nudge; a replay/next-session nudge would fit the goal better."]
   };
-  const rows = [];
+  const rows = [], overalls = [];
   for (const c of D.campaigns) for (const s of c.screens) {
     const r = R[s.id]; if (!r) continue;
     const t = s.type === "thread" ? s.messages[s.messages.length-1].text : (s.note || "");
     const n = fill(t).length;
     const link = s.type === "invite_received" || s.type === "invite_compose" ? 9 : (/https?:\/\//.test(fill(t)) ? 8 : 9);
     const oper = /personalization_short/.test(t) ? 4 : 10;
-    const overall = (r[0]*0.45 + r[1]*0.35 + link*0.10 + oper*0.10);
+    const overall = (r[0]*0.45 + r[1]*0.35 + link*0.10 + oper*0.10); overalls.push(overall);
     const cls = v => v >= 7.5 ? "g" : v >= 6 ? "a" : "r";
     const cap = s.type === "thread" ? 400 : 180;
     rows.push(`<tr><td><b>${s.label}</b><div style="color:#777;font-size:12px">${s.sub}</div></td><td class="num ${n > cap ? "long" : ""}">${n}${n > cap ? " ▲" : ""}</td><td><span class="b ${cls(r[0])}">${r[0].toFixed(1)}</span></td><td><span class="b ${cls(r[1])}">${r[1].toFixed(1)}</span></td><td><span class="b ${cls(overall)}">${overall.toFixed(1)}</span></td><td>${r[2]}</td></tr>`);
   }
   document.getElementById("msgRows").innerHTML = rows.join("");
-  const vals = Object.values(R); const avg = i => (vals.reduce((a,v)=>a+v[i],0)/vals.length).toFixed(1);
-  document.getElementById("avgline").innerHTML = `<b>Per-message averages from the table below:</b> craft ${avg(0)} / 10 · webinar alignment ${avg(1)} / 10 across ${vals.length} messages.`;
+  const vals = Object.values(R); const avg = i => (vals.reduce((a,v)=>a+v[i],0)/vals.length);
+  const overallAvg = overalls.reduce((a,v)=>a+v,0)/overalls.length;
+  const curIds = Object.keys(R).filter(k => !/live|-v1$/.test(k)); const curAvg = curIds.reduce((a,k)=>a+R[k][1],0)/curIds.length;
+  document.getElementById("heroCraft").firstChild.nodeValue = avg(0).toFixed(1);
+  document.getElementById("heroWeb").firstChild.nodeValue = avg(1).toFixed(1);
+  document.getElementById("heroWebCur").textContent = curAvg.toFixed(1);
+  document.getElementById("heroAll").firstChild.nodeValue = overallAvg.toFixed(1);
+  document.getElementById("avgline").innerHTML = `<b>Per-message averages:</b> craft ${avg(0).toFixed(1)} · webinar alignment ${avg(1).toFixed(1)} (${curAvg.toFixed(1)} for the ${curIds.length} messages as currently sequenced, excluding LIVE and superseded versions) · weighted overall ${overallAvg.toFixed(1)}, across ${vals.length} messages.`;
 })();
 </script>
 </body>

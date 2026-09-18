@@ -45,7 +45,7 @@
   const linkChecks = [
     { url: ASSESS, status: 200, title: "Reduce Your Databricks Costs up to 75% — BigHammer.ai" },
     { url: DEMO, status: "broken", title: "HTTP 200 but the page renders \"BigHammer Ai — This calendar is currently unavailable.\" Re-enable the event type in Calendly before A4, B2-hot or C3 ship." },
-    { url: WEBINAR, status: 200, title: "Reduce Databricks Costs — to 75% — Live Masterclass | BigHammer.ai" },
+    { url: WEBINAR, status: "warn", title: "Loads, but the served HTML still says \"June 18, 2026 · 11:00 AM ET\"; only the in-browser render shows 15 Oct, 12:00 PM ET. Link unfurls and crawlers see the June date." },
     { url: "{{replay_url}}", status: null, title: "No replay page exists yet — sample falls back to the webinar page" }
   ];
   const linkCheckedAt = "18 Sep 2026, 23:08 IST";
