@@ -197,3 +197,13 @@ body.no-preview .prev{display:none}
 .card-sub{margin-top:5px;font-weight:600;color:#333}
 .arrow{flex:0 0 auto;align-self:flex-start;margin-top:14px;font-size:26px;color:#9a968e;padding:0 2px}
 .sidenav a .tag{color:#555;background:#ecebe8}
+
+/* ---------- path grid ---------- */
+.grid{display:grid;gap:22px 26px;align-items:start}
+.colhead{display:flex;align-items:center;gap:10px;padding:2px 2px 12px;border-bottom:2px solid #d9d6cf;min-height:58px;position:relative}
+.colhead .arrow{position:absolute;right:-24px;top:8px;margin:0;font-size:22px}
+.rowhead{grid-column:1 / -1;font-weight:800;font-size:15px;padding:18px 2px 0;color:var(--ink);border-top:1px dashed #d9d6cf;margin-top:6px}
+.rowhead::before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--li-blue);margin-right:8px;vertical-align:1px}
+.grid .card{width:auto}
+.card-sub{font-weight:600;color:#333}
+.sidenav a{font-size:12.5px;line-height:1.3}

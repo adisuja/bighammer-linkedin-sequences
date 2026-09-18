@@ -82,20 +82,20 @@
   function currentText(scr) { return scr.type === "thread" ? scr.messages[scr.messages.length - 1].text : (scr.note || ""); }
   const words = (t) => t.trim().split(/\s+/).filter(Boolean).length;
 
-  function card(scr) {
+  function card(scr, col, rowId) {
     let screen, meta;
     if (scr.type === "thread") {
       screen = threadScreen(scr);
       const cur = scr.messages[scr.messages.length - 1], txt = fill(cur.text, "sample");
-      meta = `${words(txt)} words · ${txt.length} chars · Day ${cur.day} · 10 AM`;
+      meta = `${words(txt)} words · ${txt.length} chars · Day ${cur.day} · ${cur.time.replace(":00 am", " AM").replace(" am", " AM")}`;
     } else {
       screen = scr.type === "invite_compose" ? inviteComposeScreen(scr) : inviteReceivedScreen(scr);
       const txt = scr.note ? fill(scr.note, "sample") : "";
       meta = scr.note ? `${words(txt)} words · ${txt.length}/300 chars` : "No note";
     }
-    const copyBtn = currentText(scr) ? `<button class="copy" data-copy="${esc(scr.id)}">Copy text</button>` : "";
-    return `<article class="card" id="${esc(scr.id)}">
-      <header class="card-head">${badges(scr.kinds)}${scr.variant ? `<div class="card-sub">${esc(scr.variant)}</div>` : ""}</header>
+    const copyBtn = currentText(scr) ? `<button class="copy" data-copy="${esc(scr.scoreId)}">Copy text</button>` : "";
+    return `<article class="card" id="${esc(rowId)}-${esc(col.id)}">
+      <header class="card-head">${badges(scr.kinds)}<div class="card-sub">${esc(col.label)} · ${esc(col.title)}</div></header>
       ${phone(screen)}
       <footer class="card-foot"><div class="foot-row"><div class="meta">${meta}</div>${copyBtn}</div></footer>
     </article>`;
@@ -106,14 +106,14 @@
     const links = `<section class="campaign linkcheck" id="links"><div class="campaign-head"><h2>Link check</h2><p>Every URL used in the copy, tested ${esc(D.linkCheckedAt)}. Links inside the phones open in a new tab.</p></div><table class="ltable"><thead><tr><th>URL</th><th>Status</th><th>Page title</th></tr></thead><tbody>${D.linkChecks.map(l => `<tr><td>${/^https?:/.test(l.url) ? `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.url)}</a>` : `<span class="tok">${esc(l.url)}</span>`}</td><td><span class="st ${l.status === 200 ? "ok" : l.status === "broken" ? "bad" : "warn"}">${l.status === 200 ? "200 OK · verified visually" : l.status === "broken" ? "BROKEN" : l.status === "warn" ? "200 · stale date in HTML" : "not live yet"}</span></td><td>${esc(l.title)}</td></tr>`).join("")}</tbody></table></section>`;
     main.innerHTML = D.campaigns.map(c => `<section class="campaign" id="campaign-${c.id}">
       <div class="campaign-head"><div class="campaign-title"><h2>${esc(c.title)}</h2>${badges(c.kinds)}</div><p>${esc(c.subtitle)}</p></div>
-      <div class="rail">${c.steps.map((st, i) => `<div class="step" id="step-${esc(st.id)}">
-        <div class="step-head"><span class="step-num">${i + 1}</span><div><div class="step-label">${esc(st.label)} · ${esc(st.title)}</div><div class="step-day">${st.day === null ? esc(st.dayText || "") : `Day ${st.day} · 10 AM`}${st.variants.length > 1 ? ` · ${st.variants.length} variations` : ""}</div></div></div>
-        <div class="stack">${st.variants.map(card).join("")}</div>
-      </div>${i < c.steps.length - 1 ? '<div class="arrow">→</div>' : ""}`).join("")}</div>
+      <div class="rail"><div class="grid" style="grid-template-columns:repeat(${c.columns.length}, calc(var(--pw) * var(--s)))">
+        ${c.columns.map((col, i) => `<div class="colhead"><span class="step-num">${i + 1}</span><div><div class="step-label">${esc(col.label)} · ${esc(col.title)}</div><div class="step-day">${esc(col.day)}</div></div>${i < c.columns.length - 1 ? '<span class="arrow">→</span>' : ""}</div>`).join("")}
+        ${c.rows.map(r => `<div class="rowhead" id="${esc(r.id)}">${esc(r.label)}</div>${r.cells.map((cell, i) => card(cell, c.columns[i], r.id)).join("")}`).join("")}
+      </div></div>
     </section>`).join("") + links;
     main.querySelectorAll('.body[data-scroll="bottom"]').forEach(b => { b.scrollTop = b.scrollHeight; });
-    document.getElementById("sidenav").innerHTML = D.campaigns.map(c => `<h4>${esc(c.title)}</h4>` + c.steps.map(st =>
-      `<a href="#step-${esc(st.id)}" data-target="step-${esc(st.id)}">${esc(st.label)} · ${esc(st.title)}${st.variants.length > 1 ? `<span class="tag">${st.variants.length} var</span>` : ""}</a>`
+    document.getElementById("sidenav").innerHTML = D.campaigns.map(c => `<h4>${esc(c.title)}</h4>` + c.rows.map(r =>
+      `<a href="#${esc(r.id)}" data-target="${esc(r.id)}">${esc(r.label)}</a>`
     ).join("")).join("") + `<h4>More</h4><a href="scorecard.html">Benchmark scorecard →</a><a href="#links" data-target="links">Link check</a>`;
   }
 
@@ -147,7 +147,7 @@
   function goTo(el, instant) {
     const behavior = instant ? "auto" : "smooth";
     const rail = el.closest(".rail");
-    if (rail) rail.scrollTo({ left: el.offsetLeft - 26, behavior });
+    if (rail) rail.scrollTo({ left: 0, behavior });
     const top = el.getBoundingClientRect().top + window.scrollY - (document.querySelector(".topbar").offsetHeight + 12);
     window.scrollTo({ top: Math.max(0, top), behavior });
   }

@@ -204,81 +204,105 @@ ${DEMO}`;
   const mA1 = S(0, A1), mA2 = S(3, A2), mA3v2 = S(7, A3_V2), mA3v1 = S(7, A3_V1), mA4 = S(12, A4), mA5 = S(25, A5);
   const mB1 = S(0, B1);
 
-  // kinds: "connection" | "message" | "inmail"
+  // ---------- sequences as rows (paths). Columns = steps left to right; every cell continues its own row. ----------
+  const conn = (key, type, variant, note) => ({ key, type, kinds: ["connection"], variant, note });
+  const msg = (key, messages, kinds) => ({ key, type: "thread", kinds: kinds || ["message"], messages });
+
+  const A_COLS = [
+    { id: "A0t", label: "A0", title: "Connection request · as typed", day: "Before the accept" },
+    { id: "A0r", label: "A0", title: "Connection request · as received", day: "Before the accept" },
+    { id: "A1", label: "A1", title: "Thank-you", day: "Day 0 · 10 AM" },
+    { id: "A2", label: "A2", title: "Value, no ask", day: "Day 3 · 10 AM" },
+    { id: "A3", label: "A3", title: "The queries", day: "Day 7 · 10 AM" },
+    { id: "A4", label: "A4", title: "The ask", day: "Day 12 · 10 AM" },
+    { id: "A5", label: "A5", title: "Soft revival", day: "Day 25 · 10 AM" }
+  ];
+  const pathA = (id, label, noteKey, note, a3, a3key) => ({
+    id, label,
+    cells: [
+      conn(noteKey + "-typed", "invite_compose", "", note),
+      conn(noteKey, "invite_received", "", note),
+      msg("A1", [mA1]),
+      msg("A2", [mA1, mA2]),
+      msg(a3key, [mA1, mA2, a3]),
+      msg("A4", [mA1, mA2, a3, mA4]),
+      msg("A5", [mA1, mA2, a3, mA4, mA5])
+    ]
+  });
+
+  const B_COLS = [
+    { id: "B1", label: "B1", title: "The open", day: "Day 0 · 10 AM" },
+    { id: "B2", label: "B2", title: "Follow-up", day: "By reply" }
+  ];
+  const pathB = (id, label, open, openKey, tail, tailKey, tailKinds) => ({
+    id, label,
+    cells: [msg(openKey, [open], ["message", "inmail"]), msg(tailKey, [open, ...tail], tailKinds)]
+  });
+  const mB1live = S(0, B1_LIVE_WEBINAR);
+  const HOT = [P(0, B_REPLY_HOT), SA(0, B2_HOT)];
+  const PARK = [P(0, B_REPLY_PARK), SA(0, B3_PARK)];
+  const COLD = [S(4, B2_COLD)];
+
+  const C_COLS = [
+    { id: "C1", label: "C1 / C2", title: "Day after the event", day: "Day 0 · 10 AM" },
+    { id: "C3", label: "C3", title: "Either", day: "Day 4 · 10 AM" }
+  ];
+
   const campaigns = [
     {
       id: "A",
       title: "Campaign A — Connector",
       kinds: ["connection", "message"],
-      subtitle: "Connection request, then a message sequence after the accept. Cold, no prior relationship.",
-      steps: [
-        {
-          id: "A0", label: "A0", title: "Connection request", day: null, dayText: "Before the accept",
-          variants: [
-            { id: "A0-compose", type: "invite_compose", kinds: ["connection"], variant: "Variation 1 · post-reactive note · as typed by the sender", note: A0_NOTE },
-            { id: "A0-received", type: "invite_received", kinds: ["connection"], variant: "Variation 1 · post-reactive note · as the prospect sees it", note: A0_NOTE },
-            { id: "A0-live-role", type: "invite_received", kinds: ["connection"], variant: "Variation 2 · LIVE · role-based, no research field", note: A0_LIVE_ROLE },
-            { id: "A0-live-webinar", type: "invite_received", kinds: ["connection"], variant: "Variation 3 · LIVE · webinar-led, no research field", note: A0_LIVE_WEBINAR },
-            { id: "A0-bare", type: "invite_received", kinds: ["connection"], variant: "Variation 4 · no note", note: null }
-          ]
-        },
-        { id: "A1", label: "A1", title: "Thank-you", day: 0, variants: [{ id: "A1", type: "thread", kinds: ["message"], variant: "", messages: [mA1] }] },
-        { id: "A2", label: "A2", title: "Value, no ask", day: 3, variants: [{ id: "A2", type: "thread", kinds: ["message"], variant: "", messages: [mA1, mA2] }] },
-        {
-          id: "A3", label: "A3", title: "The queries", day: 7,
-          variants: [
-            { id: "A3-v2", type: "thread", kinds: ["message"], variant: "Variation 1 · new", messages: [mA1, mA2, mA3v2] },
-            { id: "A3-v1", type: "thread", kinds: ["message"], variant: "Variation 2 · previous", messages: [mA1, mA2, mA3v1] }
-          ]
-        },
-        { id: "A4", label: "A4", title: "The ask", day: 12, variants: [{ id: "A4", type: "thread", kinds: ["message"], variant: "", messages: [mA1, mA2, mA3v2, mA4] }] },
-        { id: "A5", label: "A5", title: "Soft revival", day: 25, variants: [{ id: "A5", type: "thread", kinds: ["message"], variant: "", messages: [mA1, mA2, mA3v2, mA4, mA5] }] }
+      subtitle: "Connection request, then a message sequence after the accept. Cold, no prior relationship. Each row is one complete path.",
+      columns: A_COLS,
+      rows: [
+        pathA("A-p1", "Path 1 · post-reactive note · A3 new version", "A0-note", A0_NOTE, mA3v2, "A3-v2"),
+        pathA("A-p2", "Path 2 · post-reactive note · A3 previous version", "A0-note", A0_NOTE, mA3v1, "A3-v1"),
+        pathA("A-p3", "Path 3 · LIVE · role-based note, no research field", "A0-live-role", A0_LIVE_ROLE, mA3v2, "A3-v2"),
+        pathA("A-p4", "Path 4 · LIVE · webinar-led note, no research field", "A0-live-webinar", A0_LIVE_WEBINAR, mA3v2, "A3-v2"),
+        pathA("A-p5", "Path 5 · no note", "A0-bare", null, mA3v2, "A3-v2")
       ]
     },
     {
       id: "B",
       title: "Campaign B — Message",
       kinds: ["message", "inmail"],
-      subtitle: "Direct messages to existing 1st-degree connections and open profiles, or InMail. No connection step.",
-      steps: [
-        {
-          id: "B1", label: "B1", title: "The open", day: 0,
-          variants: [
-            { id: "B1", type: "thread", kinds: ["message", "inmail"], variant: "Variation 1 · the 9-word open", messages: [mB1] },
-            { id: "B1-live", type: "thread", kinds: ["message", "inmail"], variant: "Variation 2 · LIVE · webinar-led", messages: [S(0, B1_LIVE_WEBINAR)] }
-          ]
-        },
-        {
-          id: "B2", label: "B2", title: "Follow-up", day: null, dayText: "Day 0 after a reply, Day 4 with no reply",
-          variants: [
-            { id: "B2-hot", type: "thread", kinds: ["message"], variant: "B2-hot · after a positive reply · Day 0", messages: [mB1, P(0, B_REPLY_HOT), SA(0, B2_HOT)] },
-            { id: "B2-cold", type: "thread", kinds: ["message", "inmail"], variant: "B2-cold · no reply · Day 4", messages: [mB1, S(4, B2_COLD)] },
-            { id: "B3-park", type: "thread", kinds: ["message"], variant: "B3-park · after a \"not now\" · Day 0", messages: [mB1, P(0, B_REPLY_PARK), SA(0, B3_PARK)] }
-          ]
-        }
+      subtitle: "Direct messages to existing 1st-degree connections and open profiles, or InMail. No connection step. Each row is one reply branch.",
+      columns: B_COLS,
+      rows: [
+        pathB("B-p1", "Path 1 · 9-word open → positive reply → B2-hot · Day 0", mB1, "B1", HOT, "B2-hot", ["message"]),
+        pathB("B-p2", "Path 2 · 9-word open → \"not now\" → B3-park · Day 0", mB1, "B1", PARK, "B3-park", ["message"]),
+        pathB("B-p3", "Path 3 · 9-word open → no reply → B2-cold · Day 4", mB1, "B1", COLD, "B2-cold", ["message", "inmail"]),
+        pathB("B-p4", "Path 4 · LIVE webinar-led open → positive reply → B2-hot · Day 0", mB1live, "B1-live", HOT, "B2-hot", ["message"]),
+        pathB("B-p5", "Path 5 · LIVE webinar-led open → \"not now\" → B3-park · Day 0", mB1live, "B1-live", PARK, "B3-park", ["message"]),
+        pathB("B-p6", "Path 6 · LIVE webinar-led open → no reply → B2-cold · Day 4", mB1live, "B1-live", COLD, "B2-cold", ["message", "inmail"])
       ]
     },
     {
       id: "C",
       title: "Campaign C — Webinar / Event",
       kinds: ["message"],
-      subtitle: "Messages to event registrants: attendees and no-shows.",
-      steps: [
-        {
-          id: "C1", label: "C1 / C2", title: "Day after the event", day: 0,
-          variants: [
-            { id: "C1", type: "thread", kinds: ["message"], variant: "C1 · attendee", messages: [S(0, C1)] },
-            { id: "C2-v2", type: "thread", kinds: ["message"], variant: "C2 · no-show · Variation 1 · new", messages: [S(0, C2_V2)] },
-            { id: "C2-v1", type: "thread", kinds: ["message"], variant: "C2 · no-show · Variation 2 · previous", messages: [S(0, C2_V1)] }
-          ]
-        },
-        { id: "C3", label: "C3", title: "Either", day: 4, variants: [{ id: "C3", type: "thread", kinds: ["message"], variant: "", messages: [S(0, C1), S(4, C3)] }] }
+      subtitle: "Messages to event registrants: attendees and no-shows. Each row is one audience.",
+      columns: C_COLS,
+      rows: [
+        { id: "C-p1", label: "Path 1 · attendee", cells: [msg("C1", [S(0, C1)]), msg("C3", [S(0, C1), S(4, C3)])] },
+        { id: "C-p2", label: "Path 2 · no-show · C2 new version", cells: [msg("C2-v2", [S(0, C2_V2)]), msg("C3", [S(0, C2_V2), S(4, C3)])] },
+        { id: "C-p3", label: "Path 3 · no-show · C2 previous version", cells: [msg("C2-v1", [S(0, C2_V1)]), msg("C3", [S(0, C2_V1), S(4, C3)])] }
       ]
     }
   ];
 
-  // Flat list kept for the scorecard page.
-  campaigns.forEach(c => { c.screens = c.steps.flatMap(st => st.variants.map(v => Object.assign({ label: `${st.label} · ${st.title}`, sub: v.variant }, v))); });
+  // Flat, de-duplicated list of distinct messages (used by the scorecard and by Copy).
+  const SCORE_KEYS = { "A0-note-typed": "A0-compose", "A0-note": "A0-received" };
+  campaigns.forEach(c => {
+    const seen = new Map();
+    c.rows.forEach(r => r.cells.forEach((cell, i) => {
+      const id = SCORE_KEYS[cell.key] || cell.key;
+      cell.scoreId = id;
+      if (!seen.has(id)) seen.set(id, Object.assign({ id, label: `${c.columns[i].label} · ${c.columns[i].title}`, sub: r.label }, cell));
+    }));
+    c.screens = [...seen.values()];
+  });
 
   window.LI_DATA = { SEP, sender, prospect, tokens, previews, linkChecks, linkCheckedAt, campaigns };
 })();
