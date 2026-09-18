@@ -28,7 +28,7 @@
   const tokens = {
     first_name: prospect.first_name,
     company: prospect.company,
-    personalization_short: "your point on Unity Catalog migration eating the quarter landed",
+    personalization_short: "your point on Unity Catalog migration eating the quarter landed.",
     webinar_date: "Thursday 15 October, 12pm ET",
     webinar_url: WEBINAR,
     replay_url: WEBINAR // no replay page exists yet; falls back to the webinar page so the link works
