@@ -57,6 +57,9 @@
     <div class="sc"><div class="n">8.6<small>/10</small></div><div class="l">Projected after the five fixes below. The copy quality is already there; the sequencing and the reminder layer are what is missing.</div></div>
   </div>
 
+  <p class="src" id="avgline"></p>
+  <p class="src">The first two numbers are sequence-level judgments: how the campaigns work as systems (ordering, branching, what reaches whom). The per-message averages from the table in section 2 are shown above for comparison; they run lower on the webinar axis because most messages have no reason to mention the event. The third number is a projection, not a measurement.</p>
+
   <h2>1. What "best in the world" looks like, in numbers</h2>
   <table class="t">
     <thead><tr><th>Metric</th><th>Platform average</th><th>Strong</th><th>Source</th></tr></thead>
@@ -168,6 +171,8 @@ Bring one number if you can: your biggest all-purpose cluster's average CPU last
     rows.push(`<tr><td><b>${s.label}</b><div style="color:#777;font-size:12px">${s.sub}</div></td><td class="num ${n > cap ? "long" : ""}">${n}${n > cap ? " ▲" : ""}</td><td><span class="b ${cls(r[0])}">${r[0].toFixed(1)}</span></td><td><span class="b ${cls(r[1])}">${r[1].toFixed(1)}</span></td><td><span class="b ${cls(overall)}">${overall.toFixed(1)}</span></td><td>${r[2]}</td></tr>`);
   }
   document.getElementById("msgRows").innerHTML = rows.join("");
+  const vals = Object.values(R); const avg = i => (vals.reduce((a,v)=>a+v[i],0)/vals.length).toFixed(1);
+  document.getElementById("avgline").innerHTML = `<b>Per-message averages from the table below:</b> craft ${avg(0)} / 10 · webinar alignment ${avg(1)} / 10 across ${vals.length} messages.`;
 })();
 </script>
 </body>
