@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BigHammer.ai · LinkedIn sequences · iOS inbox preview</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="styles.css?v=2">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">in</span>
+    <div>
+      <div class="brand-title">BigHammer.ai · LinkedIn sequences</div>
+      <div class="brand-sub">Every message rendered as the prospect sees it in the LinkedIn iOS app</div>
+    </div>
+  </div>
+  <div class="controls">
+    <div class="seg" id="seg-mode" title="Show sample merge values or the raw {{tokens}}">
+      <button data-mode="sample" class="on">Sample data</button>
+      <button data-mode="raw">{{tokens}}</button>
+    </div>
+    <label class="tgl" title="LinkedIn unfurls the first link in a message into a preview card"><input type="checkbox" id="tgl-preview" checked><span>Link previews</span></label>
+    <label class="tgl"><input type="checkbox" id="tgl-notes" checked><span>Notes</span></label>
+    <div class="seg" id="seg-scale" title="Phone size">
+      <button data-scale="1">100%</button>
+      <button data-scale="0.85" class="on">85%</button>
+      <button data-scale="0.7">70%</button>
+    </div>
+  </div>
+</header>
+<div class="layout">
+  <nav class="sidenav" id="sidenav" aria-label="Sequences"></nav>
+  <main id="main"></main>
+</div>
+<div class="toast" id="toast">Copied</div>
+<script src="data.js?v=2"></script>
+<script src="app.js?v=2"></script>
+</body>
+</html>
