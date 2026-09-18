@@ -153,9 +153,7 @@
       e.preventDefault();
       const el = document.getElementById(nav.dataset.target);
       if (el) {
-        const rail = el.closest(".rail");
-        rail.scrollTo({ left: el.offsetLeft - 26, behavior: "smooth" });
-        el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        goTo(el);
         document.querySelectorAll(".sidenav a").forEach(a => a.classList.toggle("active", a === nav));
         history.replaceState(null, "", "#" + nav.dataset.target);
       }
@@ -172,16 +170,29 @@
     if (seg) {
       seg.parentElement.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === seg));
       if (seg.dataset.mode) { state.mode = seg.dataset.mode; render(); }
-      if (seg.dataset.scale) { state.scale = +seg.dataset.scale; document.documentElement.style.setProperty("--s", state.scale); }
+      if (seg.dataset.scale) { state.scale = +seg.dataset.scale; applyScale(); }
     }
   });
   document.getElementById("tgl-preview").addEventListener("change", (e) => { document.body.classList.toggle("no-preview", !e.target.checked); rescroll(); });
   document.getElementById("tgl-notes").addEventListener("change", (e) => document.body.classList.toggle("no-notes", !e.target.checked));
 
+  function goTo(el) {
+    const rail = el.closest(".rail");
+    rail.scrollTo({ left: el.offsetLeft - 26, behavior: "smooth" });
+    const top = el.getBoundingClientRect().top + window.scrollY - (document.querySelector(".topbar").offsetHeight + 12);
+    window.scrollTo({ top, behavior: "smooth" });
+  }
   function rescroll() { document.querySelectorAll('.body[data-scroll="bottom"]').forEach(b => { b.scrollTop = b.scrollHeight; }); }
   let tt; function toast(msg) { const t = document.getElementById("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(tt); tt = setTimeout(() => t.classList.remove("show"), 1600); }
 
-  document.documentElement.style.setProperty("--s", state.scale);
+  function applyScale() {
+    const fit = window.innerWidth < 900 ? Math.min(state.scale, (window.innerWidth - 32) / 417) : state.scale;
+    document.documentElement.style.setProperty("--s", fit.toFixed(3));
+  }
+  window.addEventListener("resize", applyScale);
+  const initial = location.hash.slice(1);
+  if (initial) history.replaceState(null, "", location.pathname + location.search); // stop the native anchor jump into the rail
+  applyScale();
   render();
-  if (location.hash) { const a = document.querySelector(`[data-target="${CSS.escape(location.hash.slice(1))}"]`); if (a) setTimeout(() => a.click(), 50); }
+  if (initial) { const a = document.querySelector(`[data-target="${CSS.escape(initial)}"]`); if (a) setTimeout(() => a.click(), 60); }
 })();
