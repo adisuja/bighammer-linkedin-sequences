@@ -162,7 +162,7 @@
       e.preventDefault();
       const el = document.getElementById(nav.dataset.target);
       if (el) {
-        goTo(el);
+        goTo(el, nav.dataset.instant === "1"); delete nav.dataset.instant;
         document.querySelectorAll(".sidenav a").forEach(a => a.classList.toggle("active", a === nav));
         history.replaceState(null, "", "#" + nav.dataset.target);
       }
@@ -185,11 +185,12 @@
   document.getElementById("tgl-preview").addEventListener("change", (e) => { document.body.classList.toggle("no-preview", !e.target.checked); rescroll(); });
   document.getElementById("tgl-notes").addEventListener("change", (e) => document.body.classList.toggle("no-notes", !e.target.checked));
 
-  function goTo(el) {
+  function goTo(el, instant) {
+    const behavior = instant ? "auto" : "smooth";
     const rail = el.closest(".rail");
-    if (rail) rail.scrollTo({ left: el.offsetLeft - 26, behavior: "smooth" });
+    if (rail) rail.scrollTo({ left: el.offsetLeft - 26, behavior });
     const top = el.getBoundingClientRect().top + window.scrollY - (document.querySelector(".topbar").offsetHeight + 12);
-    window.scrollTo({ top, behavior: "smooth" });
+    window.scrollTo({ top: Math.max(0, top), behavior });
   }
   function rescroll() { document.querySelectorAll('.body[data-scroll="bottom"]').forEach(b => { b.scrollTop = b.scrollHeight; }); }
   let tt; function toast(msg) { const t = document.getElementById("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(tt); tt = setTimeout(() => t.classList.remove("show"), 1600); }
@@ -203,5 +204,5 @@
   if (initial) history.replaceState(null, "", location.pathname + location.search); // stop the native anchor jump into the rail
   applyScale();
   render();
-  if (initial) { const a = document.querySelector(`[data-target="${CSS.escape(initial)}"]`); if (a) setTimeout(() => a.click(), 60); }
+  if (initial) { const a = document.querySelector(`[data-target="${CSS.escape(initial)}"]`); if (a) { a.dataset.instant = "1"; setTimeout(() => a.click(), 60); } }
 })();
