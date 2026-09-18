@@ -54,7 +54,11 @@
   const phone = (inner) => `<div class="phone-wrap"><div class="phone"><div class="screen">${inner}</div><div class="island"></div></div></div>`;
 
   function threadScreen(scr) {
-    const msgs = scr.messages, P = D.prospect, S = D.sender;
+    // One stage per phone: show only this stage's message, plus the prospect reply that triggered it (reply branches).
+    const all = scr.messages;
+    let start = all.length - 1;
+    while (start > 0 && all[start - 1].from === "prospect") start--;
+    const msgs = all.slice(start), P = D.prospect, S = D.sender;
     let body = `<div class="profile">${av(P, 56, true)}<div class="name">${esc(P.name)} <span>· 1st</span></div><div class="head">${esc(P.headline)}</div></div>`;
     let lastDay = null;
     msgs.forEach((m, i) => {
